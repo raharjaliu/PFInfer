@@ -1,14 +1,17 @@
-import Model
+import Model2
 import random
 import math
 import matplotlib.pylab as pl
 
-class Simulation:
+class Simulation2:
 
-    m = Model.Model()
+    m = Model2.Model2()
+    propensity_update = {}
 
     def __init__(self, inputmodel):
         self.m = inputmodel
+        self.propensity_update = inputmodel.get_propensity_dependence()
+            
         
     def run_Simulation (self, time):
         timestep = 0
