@@ -3,18 +3,20 @@ class Model:
     species = {}
     rates = {}
     reactions = {}   
-    propensities = {}
-    
-    def add_species(self, tag, concentration):
-        if (tag in self.species):
-            print ('Warning: ' + tag + ' overwriting existing species')
-        self.species[tag] = concentration
-
-    def add_rate(self, tag, constant):
-        if (tag in self.rates):
-            print ('Warning: ' + tag + ' overwriting existing rate')
-        self.rates[tag] = constant
+    propensities = {} 
         
+    def add_species(self, tag, concentration):
+        if tag in globals():
+            print ('Warning: ' + tag + ' overwriting existing variable')
+        self.species[tag] = concentration
+        globals()[tag] = concentration
+        
+    def add_rate(self, tag, constant):
+        if tag in globals():
+            print ('Warning: ' + tag + ' overwriting existing variable')
+        self.rates[tag] = constant
+        globals()[tag] = constant
+    
     def add_reaction(self, tag, expressionmap):
         if (tag in self.reactions):
             print ('Warning: ' + tag + ' overwriting existing reaction')
@@ -24,8 +26,8 @@ class Model:
         if (tag in self.propensities):
             print ('Warning: ' + tag + ' overwriting existing propensity')
         self.propensities[tag] = expression
-        
-    def get_reaction(self, tag, time):
+         
+    def get_reaction_change(self, tag, time):
         outmap = {}
         if not (tag in self.reactions):
             print ('Warning: ' + tag + ' is no reaction')
@@ -33,33 +35,31 @@ class Model:
         expressionmap = self.reactions[tag]
         for key in expressionmap:
             expression = str(expressionmap[key])
-            for name in self.species:
-                expression = expression.replace(name,str(self.species[name]))
-            for name in self.rates:
-                expression = expression.replace(name,str(self.rates[name]))
             outmap[key] = time * eval(expression)
-        return outmap
+        return outmap  
     
     def execute_reaction (self,tag, time):
-        changes = self.get_reaction(tag, time)
+        changes = self.get_reaction_change(tag, time)
         for key in changes:
             self.species[key] = self.species[key] + changes[key]
-    
+            update = {key:self.species[key]}
+            globals().update(update)
+                       
     def get_propensity(self, tag):
         if not (tag in self.propensities):
             print ('Warning: ' + tag + ' has no propensity function')
             return
         expression = str(self.propensities[tag])
-        for name in self.species:
-            expression = expression.replace(name,str(self.species[name]))
-        for name in self.rates:
-            expression = expression.replace(name,str(self.rates[name]))
         return eval(expression)
-            
-        
-        
-        
-        
-        
-        
+    
+    def get_propensity_dependence(self):
+        dependencemap = {}                                                                                                             
+        for reaction in self.reactions:
+            reactionmap = {}
+            for name in self.reactions[reaction]:
+                for prop in self.propensities:
+                    if name in self.propensities[prop]:
+                        reactionmap[prop] = True
+            dependencemap[reaction]=reactionmap
+        return dependencemap
         
