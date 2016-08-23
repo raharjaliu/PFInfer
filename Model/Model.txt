@@ -19,25 +19,25 @@
 		<Reaction>
 			<name>ProduceGata1</name>
 			<changes>
-				<species name = 'Gata1' change='Kpg' />
+				<change name = 'Gata1' expression='Kpg' />
 			</changes>
 		</Reaction>
 		<Reaction>
 			<name>ProducePu1</name>
 			<changes>
-				<species name = 'Pu1' change='Kpp' />
+				<change name = 'Pu1' expression='Kpp' />
 			</changes>
 		</Reaction>
 		<Reaction>
 			<name>DegradeGata1</name>
 			<changes>
-				<species name = 'Gata1' change='-Kdg*Gata1' />
+				<change name = 'Gata1' expression='-Kdg*Gata1' />
 			</changes>
 		</Reaction>
 		<Reaction>
 			<name>DegradePu1</name>
 			<changes>
-				<species name = 'Pu1' change='-Kdp*Pu1' />
+				<change name = 'Pu1' expression='-Kdp*Pu1' />
 			</changes>
 		</Reaction>
 	</ReactionList>
