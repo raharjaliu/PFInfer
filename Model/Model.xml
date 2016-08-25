@@ -17,24 +17,16 @@
 	</TunableList>
 	<ReactionList>
 		<Reaction name = 'ProduceGata1'>
-			<Changes>
-				<Change name = 'Gata1' expression='Kpg' />
-			</Changes>
+			<Change name = 'Gata1' expression='Kpg' />
 		</Reaction>
 		<Reaction name = 'ProducePu1'>
-			<Changes>
-				<Change name = 'Pu1' expression='Kpp' />
-			</Changes>
+			<Change name = 'Pu1' expression='Kpp' />
 		</Reaction>
 		<Reaction name = 'DegradeGata1'>
-			<Changes>
-				<Change name = 'Gata1' expression='-Kdg*Gata1' />
-			</Changes>
+			<Change name = 'Gata1' expression='-Kdg*Gata1' />
 		</Reaction>
 		<Reaction name = 'DegradePu1'>
-			<Changes>
-				<Change name = 'Pu1' expression='-Kdp*Pu1' />
-			</Changes>
+			<Change name = 'Pu1' expression='-Kdp*Pu1' />
 		</Reaction>
 	</ReactionList>
 	<PropensityList>
