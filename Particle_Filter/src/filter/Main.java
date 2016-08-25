@@ -18,20 +18,26 @@ public class Main {
 				.longOpt("Model").desc("Model xml file").build();
 		Option option2 = Option.builder("d").required(true).hasArg(true)
 				.longOpt("Data").desc("Time series data file").build();
+		Option option3 = Option.builder("p").required(true).hasArg(true)
+				.longOpt("Particles").desc("Number of particles").build();
+		Option option4 = Option.builder("c").required(true).hasArg(true)
+				.longOpt("Cores").desc("Number of threads").build();
 
 		Options options = new Options();
 		options.addOption(option1);
 		options.addOption(option2);
+		options.addOption(option3);
+		options.addOption(option4);
 
 		String header = "Parametrize Model for Time series Data\n\n";
 		String footer = "\n";
 
 		HelpFormatter formatter = new HelpFormatter();
 
-		CommandLine line = null;
+		CommandLine argumentline = null;
 		CommandLineParser parser = new DefaultParser();
 		try {
-			line = parser.parse(options, args);
+			argumentline = parser.parse(options, args);
 
 		} catch (ParseException exp) {
 			System.err.println("Parsing failed.  Reason: " + exp.getMessage());
@@ -40,8 +46,11 @@ public class Main {
 			System.exit(1);
 		}
 
-		File modelfile = new File(line.getOptionValue('m'));
-		File datafile = new File(line.getOptionValue('d'));
+		File modelfile = new File(argumentline.getOptionValue('m'));
+		File datafile = new File(argumentline.getOptionValue('d'));
+		
+		int cores = Integer.parseInt(argumentline.getOptionValue('c'));
+		int particles = Integer.parseInt(argumentline.getOptionValue('p'));
 		
 		Xmlparser generator = new Xmlparser();
 		
