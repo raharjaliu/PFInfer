@@ -3,72 +3,85 @@ import argparse
 import Model
 import Simulation
 import copy
-
-import time
-import numpy as np
-import matplotlib.pylab as pl
+import os.path
+import xml.etree.ElementTree as ET
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-m', action='store', dest='modelfile', help='Model file')
 parser.add_argument('-o', action='store', dest='outputfile', help='Output file name')
 parser.add_argument('-t', action='store', dest='simulationtime', help='Simulation time')
-parser.add_argument('-v', action='store', dest='interval', help='Interval time')
+parser.add_argument('-v', nargs= '?', action='store', dest='interval', help='Interval time')
 results = parser.parse_args()
 
 modelpath = results.modelfile
 outputpath = results.outputfile
+
+if(os.path.isfile(outputpath) and os.stat(outputpath).st_size != 0):
+    print ('Warning: ' + outputpath + ' is no empty file and is being overwritten')
+    
 simulationtime = results.simulationtime
 interval = results.interval
 
+modeltree = ET.parse(modelpath)
+modelroot = modeltree.getroot()
+
 m1 = Model.Model()
 
-m1.add_species('Gata1', 1.0)
-m1.add_species('Pu1', 1.0)
+for neighbor in modelroot.iter('Species'):
+    m1.add_species(neighbor.attrib['name'], float(neighbor.attrib['value']))
 
-m1.add_rate('Kpg', 12.0)
-m1.add_rate('Kpp', 12.0)
-m1.add_rate('Kdg', 0.2)
-m1.add_rate('Kdp', 0.2)
+for neighbor in modelroot.iter('Constant'):
+    m1.add_rate(neighbor.attrib['name'], float(neighbor.attrib['value']))
 
-m1.add_reaction('ProduceGata1',{'Gata1':'Kpg'})
-m1.add_reaction('ProducePu1',{'Pu1':'Kpg'})
-m1.add_reaction('DegradeGata1',{'Gata1':'-Kdg*Gata1'})
-m1.add_reaction('DegradePu1',{'Pu1':'-Kdp*Pu1'})
+for neighbor in modelroot.iter('Tunable'):
+    m1.add_rate(neighbor.attrib['name'], float(neighbor.attrib['value']))
+    
+for neighbor in modelroot.iter('Reaction'):
+    changemap = {}
+    tag = ''
+    for neighbor2 in neighbor.iter('Tag'):
+        tag = neighbor2.attrib['name']
+    for neighbor2 in neighbor.iter('Change'):
+        changemap[neighbor2.attrib['name']]= neighbor2.attrib['expression']
+    m1.add_reaction(tag,changemap)
 
-m1.add_rate('KInhibitGata', 2)
-m1.add_rate('KInhibitPu', 2)
-
-m1.add_propensity('ProduceGata1', 'Kpg *(Pu1**-2/(Pu1**-2 + KInhibitGata**-2))')
-m1.add_propensity('ProducePu1', 'Kpp*(Gata1**-2/(Gata1**-2 + KInhibitPu**-2))')
-m1.add_propensity('DegradeGata1', 'Kdg*Gata1')
-m1.add_propensity('DegradePu1', 'Kdp*Pu1')
-
+for neighbor in modelroot.iter('Propensity'):
+    m1.add_propensity(neighbor.attrib['name'], str(neighbor.attrib['expression']))
 
 s1 = Simulation.Simulation(copy.deepcopy(m1))
 trajectory = s1.run_Simulation(float(simulationtime))
-intervaltrajectory =  s1.get_interval(trajectory, float(interval))
+outputtrajectory = trajectory
 
+if (interval is not None):
+    intervaltrajectory =  s1.get_interval(trajectory, float(interval))
+    outputtrajectory = intervaltrajectory
+    
 outfile = open(outputpath, 'w')
 
-steps = len(intervaltrajectory['time'])
-print(steps)
+firstline =''
+for key in outputtrajectory:
+    firstline = firstline + '\t' +key
+firstline = firstline.strip()
+firstline = firstline + '\n'
+outfile.write(firstline)
 
+steps = len(outputtrajectory['time'])
+
+for i in range(steps):
+    line =''
+    for key in outputtrajectory:
+        line = line  + '\t' + str(outputtrajectory[key][i])        
+    line = line.strip()
+    line = line + '\n'
+    outfile.write(line)
 outfile.close()
 
 '''
-times = []
-for i in range(50):
-    s2 = Simulation.Simulation(copy.deepcopy(m1))
-    t1 = time.time()
-    s2.run_Simulation(simulationtime)           
-    t2 = time.time()
-    times.append(t2-t1)
+import matplotlib.pylab as pl
 
-print(np.mean(times))
-
-pl.plot(intervaltrajectory['time'],intervaltrajectory['Gata1'],'r')
-pl.plot(intervaltrajectory['time'],intervaltrajectory['Pu1'], 'g')
-pl.xlim(0.0, intervaltrajectory['time'][-1])
+pl.plot(outputtrajectory['time'],outputtrajectory['Gata1'],'r')
+pl.plot(outputtrajectory['time'],outputtrajectory['Pu1'], 'g')
+pl.xlim(0.0, outputtrajectory['time'][-1])
 pl.show()
 '''
 
