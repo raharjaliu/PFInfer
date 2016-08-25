@@ -16,26 +16,22 @@
 		<Tunable name ='Kdp' type='double' value='0.2' />
 	</TunableList>
 	<ReactionList>
-		<Reaction>
-			<Tag name = 'ProduceGata1'/>
+		<Reaction name = 'ProduceGata1'>
 			<Changes>
 				<Change name = 'Gata1' expression='Kpg' />
 			</Changes>
 		</Reaction>
-		<Reaction>
-			<Tag name = 'ProducePu1'/>
+		<Reaction name = 'ProducePu1'>
 			<Changes>
 				<Change name = 'Pu1' expression='Kpp' />
 			</Changes>
 		</Reaction>
-		<Reaction>
-			<Tag name = 'DegradeGata1'/>
+		<Reaction name = 'DegradeGata1'>
 			<Changes>
 				<Change name = 'Gata1' expression='-Kdg*Gata1' />
 			</Changes>
 		</Reaction>
-		<Reaction>
-			<Tag name = 'DegradePu1'/>
+		<Reaction name = 'DegradePu1'>
 			<Changes>
 				<Change name = 'Pu1' expression='-Kdp*Pu1' />
 			</Changes>
