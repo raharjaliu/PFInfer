@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Model>
+	<Description text='Simple cross inhibitory model '/>
+	<SpeciesList>
+		<Species name ='Gata1' type='double' value='1.0' />
+		<Species name ='Pu1' type='double' value='1.0' />
+	</SpeciesList>
+	<ConstantList>
+		<Constant name ='KInhibitGata' type='double' value='2.0' />
+		<Constant name ='KInhibitPu' type='double' value='2.0' />
+	</ConstantList>
+	<TunableList>
+		<Tunable name ='Kpg' type='double' value='12.0' />
+		<Tunable name ='Kpp' type='double' value='12.0' />
+		<Tunable name ='Kdg' type='double' value='0.2' />
+		<Tunable name ='Kdp' type='double' value='0.2' />
+	</TunableList>
+	<ReactionList>
+		<Reaction>
+			<Tag name = 'ProduceGata1'/>
+			<Changes>
+				<Change name = 'Gata1' expression='Kpg' />
+			</Changes>
+		</Reaction>
+		<Reaction>
+			<Tag name = 'ProducePu1'/>
+			<Changes>
+				<Change name = 'Pu1' expression='Kpp' />
+			</Changes>
+		</Reaction>
+		<Reaction>
+			<Tag name = 'DegradeGata1'/>
+			<Changes>
+				<Change name = 'Gata1' expression='-Kdg*Gata1' />
+			</Changes>
+		</Reaction>
+		<Reaction>
+			<Tag name = 'DegradePu1'/>
+			<Changes>
+				<Change name = 'Pu1' expression='-Kdp*Pu1' />
+			</Changes>
+		</Reaction>
+	</ReactionList>
+	<PropensityList>
+		<Propensity name='ProduceGata1' expression = 'Kpg *(Pu1**-2/(Pu1**-2 + KInhibitGata**-2))'/>
+		<Propensity name='ProducePu1' expression = 'Kpp*(Gata1**-2/(Gata1**-2 + KInhibitPu**-2))'/>
+		<Propensity name='DegradeGata1' expression = 'Kdg*Gata1'/>
+		<Propensity name='DegradePu1' expression = 'Kdp*Pu1'/>
+	</PropensityList>
+</Model>
