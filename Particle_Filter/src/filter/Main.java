@@ -56,5 +56,6 @@ public class Main {
 		
 		Model modelbase = generator.generate_model(modelfile);
 
+		
 	}
 }
