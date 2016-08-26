@@ -13,7 +13,7 @@ import org.w3c.dom.NodeList;
 
 public class Xmlparser {
 
-	public Model generate_model(File xmlfile) {
+	public Model generatemodel(File xmlfile) {
 
 		Model m = new Model();
 		Document doc = null;
@@ -23,7 +23,7 @@ public class Xmlparser {
 					.newDocumentBuilder();
 			doc = dBuilder.parse(xmlfile);
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			System.err.println(e.getMessage());
 		}
 
 		NodeList nList = doc.getElementsByTagName("Species");
@@ -31,7 +31,7 @@ public class Xmlparser {
 			Element e = (Element) nList.item(i);
 			String tag = e.getAttribute("name");
 			Double value = Double.parseDouble(e.getAttribute("value"));
-			m.species.put(tag, value);
+			m.addSpecies(tag, value);
 		}
 
 		nList = doc.getElementsByTagName("Constant");
@@ -39,7 +39,7 @@ public class Xmlparser {
 			Element e = (Element) nList.item(i);
 			String tag = e.getAttribute("name");
 			Double value = Double.parseDouble(e.getAttribute("value"));
-			m.constant.put(tag, value);
+			m.addConstant(tag, value);
 		}
 
 		nList = doc.getElementsByTagName("Tunable");
@@ -47,7 +47,7 @@ public class Xmlparser {
 			Element e = (Element) nList.item(i);
 			String tag = e.getAttribute("name");
 			Double value = Double.parseDouble(e.getAttribute("value"));
-			m.tunable.put(tag, value);
+			m.addTunable(tag, value);
 		}
 
 		nList = doc.getElementsByTagName("Propensity");
@@ -55,7 +55,7 @@ public class Xmlparser {
 			Element e = (Element) nList.item(i);
 			String tag = e.getAttribute("name");
 			String value = e.getAttribute("expression");
-			m.propensity.put(tag, value);
+			m.addPropensity(tag, value);
 		}
 
 		nList = doc.getElementsByTagName("Reaction");
@@ -72,12 +72,12 @@ public class Xmlparser {
 					reactionmap.put(changedspecies, changeexpression);
 				}
 			}
-			m.reaction.put(tag, reactionmap);
+			m.addReaction(tag, reactionmap);
 		}	
-		m.pepare_evaluators();
-		m.update_species_variables();
-		m.update_constant_variables();
-		m.update_tunable_variables();
+		m.pepareEvaluators();
+		m.updateSpeciesVariables();
+		m.updateConstantVariables();
+		m.updateTunableVariables();
 		return m;
 	}
 }

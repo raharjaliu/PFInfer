@@ -9,36 +9,36 @@ import expr.Variable;
 
 public class Model {
 
-	HashMap<String, Double> species = new HashMap<String, Double>();
-	HashMap<String, Double> constant = new HashMap<String, Double>();
-	HashMap<String, Double> tunable = new HashMap<String, Double>();
-	HashMap<String, HashMap<String, String>> reaction = new HashMap<String, HashMap<String, String>>();
-	HashMap<String, String> propensity = new HashMap<String, String>();
+	private HashMap<String, Double> species = new HashMap<String, Double>();
+	private HashMap<String, Double> constant = new HashMap<String, Double>();
+	private HashMap<String, Double> tunable = new HashMap<String, Double>();
+	private HashMap<String, HashMap<String, String>> reaction = new HashMap<String, HashMap<String, String>>();
+	private HashMap<String, String> propensity = new HashMap<String, String>();
 
-	HashMap<String, Expr> propensitymap = new HashMap<String, Expr>();
-	HashMap<String, HashMap<String, Expr>> reactionmap = new HashMap<String, HashMap<String, Expr>>();
+	private HashMap<String, Expr> propensitymap = new HashMap<String, Expr>();
+	private HashMap<String, HashMap<String, Expr>> reactionmap = new HashMap<String, HashMap<String, Expr>>();
 
-	public void add_species(String name, Double value) {
+	public void addSpecies(String name, Double value) {
 		species.put(name, value);
 	}
 
-	public void add_constant(String name, Double value) {
+	public void addConstant(String name, Double value) {
 		constant.put(name, value);
 	}
 
-	public void add_tunable(String name, Double value) {
+	public void addTunable(String name, Double value) {
 		tunable.put(name, value);
 	}
 
-	public void add_reaction(String name, HashMap<String, String> reactionmap) {
+	public void addReaction(String name, HashMap<String, String> reactionmap) {
 		reaction.put(name, reactionmap);
 	}
 
-	public void add_species(String name, String expression) {
+	public void addPropensity(String name, String expression) {
 		propensity.put(name, expression);
 	}
 
-	public void pepare_evaluators() {
+	public void pepareEvaluators() {
 		Parser parser = new Parser();
 		for (String name : propensity.keySet()) {
 			String expression = propensity.get(name);
@@ -69,33 +69,33 @@ public class Model {
 		}
 	}
 
-	public void update_species_variables() {
+	public void updateSpeciesVariables() {
 		for (String name : species.keySet()) {
 			Variable temp = Variable.make(name);
 			temp.setValue(species.get(name));
 		}
 	}
 
-	public void update_constant_variables() {
+	public void updateConstantVariables() {
 		for (String name : constant.keySet()) {
 			Variable temp = Variable.make(name);
 			temp.setValue(constant.get(name));
 		}
 	}
 
-	public void update_tunable_variables() {
+	public void updateTunableVariables() {
 		for (String name : tunable.keySet()) {
 			Variable temp = Variable.make(name);
 			temp.setValue(tunable.get(name));
 		}
 	}
 
-	public Double get_propensity(String name) {
+	public Double getPropensity(String name) {
 		Expr expr = propensitymap.get(name);
 		return (expr.value());
 	}
 
-	public void execute_reaction(String name, Double time) {
+	public void executeReaction(String name, Double time) {
 		HashMap<String, Expr> changemap = reactionmap.get(name);
 		for (String key : changemap.keySet()) {
 			Double old = species.get(key);
@@ -103,7 +103,7 @@ public class Model {
 			//System.out.println(old + "\t" + change +"\t" + (old +change));
 			species.put(key, old + change);			
 		}
-		this.update_species_variables();
+		this.updateSpeciesVariables();
 	}
 
 }

@@ -41,20 +41,20 @@ public class Main {
 
 		} catch (ParseException exp) {
 			System.err.println("Parsing failed.  Reason: " + exp.getMessage());
-			formatter.printHelp("Particle_Filter", header, options, footer,
+			formatter.printHelp("ParticleFilter", header, options, footer,
 					true);
 			System.exit(1);
 		}
 
-		File modelfile = new File(argumentline.getOptionValue('m'));
-		File datafile = new File(argumentline.getOptionValue('d'));
+		final File modelfile = new File(argumentline.getOptionValue('m'));
+		final File datafile = new File(argumentline.getOptionValue('d'));
 		
-		int cores = Integer.parseInt(argumentline.getOptionValue('c'));
-		int particles = Integer.parseInt(argumentline.getOptionValue('p'));
+		final int cores = Integer.parseInt(argumentline.getOptionValue('c'));
+		final int particles = Integer.parseInt(argumentline.getOptionValue('p'));
 		
 		Xmlparser generator = new Xmlparser();
 		
-		Model modelbase = generator.generate_model(modelfile);
+		Model modelbase = generator.generatemodel(modelfile);
 
 		
 	}
