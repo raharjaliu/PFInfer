@@ -31,7 +31,7 @@
 	</ReactionList>
 	<PropensityList>
 		<Propensity name='ProduceGata1' expression = 'Kpg *((1/(Pu1*Pu1))/((1/(Pu1*Pu1)) + 1/(KInhibitGata*KInhibitGata)))'/>
-		<Propensity name='ProducePu1' expression = 'Kpp*((1/(Gata1*Gata1))/(1/(Gata1*Gata1)) + 1/(KInhibitPu*KInhibitPu))'/>
+		<Propensity name='ProducePu1' expression = 'Kpp*((1/(Gata1*Gata1))/((1/(Gata1*Gata1)) + 1/(KInhibitPu*KInhibitPu)))'/>
 		<Propensity name='DegradeGata1' expression = 'Kdg*Gata1'/>
 		<Propensity name='DegradePu1' expression = 'Kdp*Pu1'/>
 	</PropensityList>
