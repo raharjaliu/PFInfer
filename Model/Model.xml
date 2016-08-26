@@ -30,8 +30,8 @@
 		</Reaction>
 	</ReactionList>
 	<PropensityList>
-		<Propensity name='ProduceGata1' expression = 'Kpg *(Pu1**-2/(Pu1**-2 + KInhibitGata**-2))'/>
-		<Propensity name='ProducePu1' expression = 'Kpp*(Gata1**-2/(Gata1**-2 + KInhibitPu**-2))'/>
+		<Propensity name='ProduceGata1' expression = 'Kpg *((1/(Pu1*Pu1))/((1/(Pu1*Pu1)) + 1/(KInhibitGata*KInhibitGata)))'/>
+		<Propensity name='ProducePu1' expression = 'Kpp*((1/(Gata1*Gata1))/(1/(Gata1*Gata1)) + 1/(KInhibitPu*KInhibitPu))'/>
 		<Propensity name='DegradeGata1' expression = 'Kdg*Gata1'/>
 		<Propensity name='DegradePu1' expression = 'Kdp*Pu1'/>
 	</PropensityList>
