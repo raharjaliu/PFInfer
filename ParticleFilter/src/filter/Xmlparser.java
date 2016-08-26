@@ -31,7 +31,7 @@ public class Xmlparser {
 			Element e = (Element) nList.item(i);
 			String tag = e.getAttribute("name");
 			Double value = Double.parseDouble(e.getAttribute("value"));
-			m.addSpecies(tag, value);
+			m.setSpecies(tag, value);
 		}
 
 		nList = doc.getElementsByTagName("Constant");
@@ -39,7 +39,7 @@ public class Xmlparser {
 			Element e = (Element) nList.item(i);
 			String tag = e.getAttribute("name");
 			Double value = Double.parseDouble(e.getAttribute("value"));
-			m.addConstant(tag, value);
+			m.setConstant(tag, value);
 		}
 
 		nList = doc.getElementsByTagName("Tunable");
@@ -47,7 +47,7 @@ public class Xmlparser {
 			Element e = (Element) nList.item(i);
 			String tag = e.getAttribute("name");
 			Double value = Double.parseDouble(e.getAttribute("value"));
-			m.addTunable(tag, value);
+			m.setTunable(tag, value);
 		}
 
 		nList = doc.getElementsByTagName("Propensity");
@@ -55,7 +55,7 @@ public class Xmlparser {
 			Element e = (Element) nList.item(i);
 			String tag = e.getAttribute("name");
 			String value = e.getAttribute("expression");
-			m.addPropensity(tag, value);
+			m.setPropensity(tag, value);
 		}
 
 		nList = doc.getElementsByTagName("Reaction");
@@ -72,7 +72,7 @@ public class Xmlparser {
 					reactionmap.put(changedspecies, changeexpression);
 				}
 			}
-			m.addReaction(tag, reactionmap);
+			m.setReaction(tag, reactionmap);
 		}	
 		m.pepareEvaluators();
 		m.updateSpeciesVariables();

@@ -18,23 +18,23 @@ public class Model {
 	private HashMap<String, Expr> propensitymap = new HashMap<String, Expr>();
 	private HashMap<String, HashMap<String, Expr>> reactionmap = new HashMap<String, HashMap<String, Expr>>();
 
-	public void addSpecies(String name, Double value) {
+	public void setSpecies(String name, Double value) {
 		species.put(name, value);
 	}
 
-	public void addConstant(String name, Double value) {
+	public void setConstant(String name, Double value) {
 		constant.put(name, value);
 	}
 
-	public void addTunable(String name, Double value) {
+	public void setTunable(String name, Double value) {
 		tunable.put(name, value);
 	}
 
-	public void addReaction(String name, HashMap<String, String> reactionmap) {
+	public void setReaction(String name, HashMap<String, String> reactionmap) {
 		reaction.put(name, reactionmap);
 	}
 
-	public void addPropensity(String name, String expression) {
+	public void setPropensity(String name, String expression) {
 		propensity.put(name, expression);
 	}
 
@@ -90,20 +90,24 @@ public class Model {
 		}
 	}
 
-	public Double getPropensity(String name) {
-		Expr expr = propensitymap.get(name);
-		return (expr.value());
-	}
-
 	public void executeReaction(String name, Double time) {
 		HashMap<String, Expr> changemap = reactionmap.get(name);
 		for (String key : changemap.keySet()) {
 			Double old = species.get(key);
-			Double change = time *changemap.get(key).value();
-			//System.out.println(old + "\t" + change +"\t" + (old +change));
-			species.put(key, old + change);			
+			Double change = time * changemap.get(key).value();
+			// System.out.println(old + "\t" + change +"\t" + (old +change));
+			species.put(key, old + change);
 		}
 		this.updateSpeciesVariables();
+	}
+
+	public Double getPropensity(String name) {
+		Expr expr = propensitymap.get(name);
+		return (expr.value());
+	}
+	
+	public HashMap<String, String> getPropensities(){
+		return propensity;
 	}
 
 }
