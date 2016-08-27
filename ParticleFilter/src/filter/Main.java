@@ -10,6 +10,9 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import filter.Model;
+import filter.Xmlparser;
+
 public class Main {
 
 	public static void main(String[] args) {
@@ -56,10 +59,18 @@ public class Main {
 		
 		Model modelbase = generator.generatemodel(modelfile);
 
-		Model m2 = generator.generatemodel(modelfile);
+		Model m2 = modelbase.deepCopy();
+		
+		Simulation sim = new Simulation(m2);
+		
+		SimulationStatistics stat = sim.runSimulation(1000.0);
 		
 		modelbase.executeReaction("ProduceGata1", 1.0);
-		m2.executeReaction("DegradeGata1", 1.0);
+		modelbase.executeReaction("ProduceGata1", 1.0);
+		modelbase.executeReaction("DegradeGata1", 1.0);
 		
+		m2.executeReaction("DegradeGata1", 1.0);
+		m2.executeReaction("ProduceGata1", 1.0);
+		m2.executeReaction("DegradeGata1", 1.0);
 	}
 }

@@ -25,7 +25,7 @@ public class SimulationStatistics {
 	
 	//TODO: check if executedNum need to be updated by 1 or by time
 	public void updateStatistic (String reaction, Double propensity, Double time){
-		Double temp = executedNum.get(reaction) + time;
+		Double temp = executedNum.get(reaction) + 1.0;
 		executedNum.put(reaction, temp);
 		temp = propSum.get(reaction) + (time*propensity);
 		propSum.put(reaction, temp);		

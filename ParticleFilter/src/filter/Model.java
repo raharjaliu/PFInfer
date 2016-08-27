@@ -2,10 +2,11 @@ package filter;
 
 import java.util.HashMap;
 
-import expr.Expr;
-import expr.Parser;
-import expr.SyntaxException;
-import expr.Variable;
+import parsii.eval.Expression;
+import parsii.eval.Parser;
+import parsii.eval.Scope;
+import parsii.eval.Variable;
+import parsii.tokenizer.ParseException;
 
 public class Model {
 
@@ -15,8 +16,10 @@ public class Model {
 	private HashMap<String, HashMap<String, String>> reaction = new HashMap<String, HashMap<String, String>>();
 	private HashMap<String, String> propensity = new HashMap<String, String>();
 
-	private HashMap<String, Expr> propensitymap = new HashMap<String, Expr>();
-	private HashMap<String, HashMap<String, Expr>> reactionmap = new HashMap<String, HashMap<String, Expr>>();
+	private HashMap<String, Expression> propensitymap = new HashMap<String, Expression>();
+	private HashMap<String, HashMap<String, Expression>> reactionmap = new HashMap<String, HashMap<String, Expression>>();
+	
+	private Scope variablespace = Scope.create();   
 
 	public void setSpecies(String name, Double value) {
 		species.put(name, value);
@@ -39,13 +42,12 @@ public class Model {
 	}
 
 	public void pepareEvaluators() {
-		Parser parser = new Parser();
 		for (String name : propensity.keySet()) {
 			String expression = propensity.get(name);
-			Expr expr = null;
+			Expression  expr = null;
 			try {
-				expr = parser.parseString(expression);
-			} catch (SyntaxException e) {
+				expr = Parser.parse(expression,variablespace);
+			} catch (ParseException e) {
 				System.out.println(e);
 				System.exit(1);
 			}
@@ -53,13 +55,13 @@ public class Model {
 		}
 		for (String name : reaction.keySet()) {
 			HashMap<String, String> changemap = reaction.get(name);
-			HashMap<String, Expr> expressionmap = new HashMap<String, Expr>();
+			HashMap<String, Expression> expressionmap = new HashMap<String, Expression>();
 			for (String key : changemap.keySet()) {
 				String expression = changemap.get(key);
-				Expr expr = null;
+				Expression expr = null;
 				try {
-					expr = parser.parseString(expression);
-				} catch (SyntaxException e) {
+					expr = Parser.parse(expression,variablespace);
+				} catch (ParseException e) {
 					System.out.println(e);
 					System.exit(1);
 				}
@@ -71,43 +73,43 @@ public class Model {
 
 	public void updateSpeciesVariables() {
 		for (String name : species.keySet()) {
-			Variable temp = Variable.make(name);
+			Variable temp = variablespace.getVariable(name);  
 			temp.setValue(species.get(name));
 		}
 	}
 
 	public void updateConstantVariables() {
 		for (String name : constant.keySet()) {
-			Variable temp = Variable.make(name);
+			Variable temp = variablespace.getVariable(name);  
 			temp.setValue(constant.get(name));
 		}
 	}
 
 	public void updateTunableVariables() {
 		for (String name : tunable.keySet()) {
-			Variable temp = Variable.make(name);
+			Variable temp = variablespace.getVariable(name);  
 			temp.setValue(tunable.get(name));
 		}
 	}
 
 	public void executeReaction(String name, Double time) {
-		HashMap<String, Expr> changemap = reactionmap.get(name);
+		HashMap<String, Expression> changemap = reactionmap.get(name);
 		for (String key : changemap.keySet()) {
 			Double old = species.get(key);
-			//TODO: Fix Model so each has its own Variable Space
-			this.updateSpeciesVariables();
-			this.updateTunableVariables();
-			//remove these updates after fix
-			Double change = time * changemap.get(key).value();
-			System.out.println(old + "\t" + change +"\t" + (old +change));
-			species.put(key, old + change);
+			Double change = time * changemap.get(key).evaluate();
+			Double newValue = old + change;
+			//System.out.println(old + "\t" + change +"\t" + newValue);
+			species.put(key, newValue);
+			Variable temp = variablespace.getVariable(key);  
+			temp.setValue(newValue);
+			
 		}
 		this.updateSpeciesVariables();
 	}
 
 	public Double getPropensity(String name) {
-		Expr expr = propensitymap.get(name);
-		return (expr.value());
+		Expression expr = propensitymap.get(name);
+		return (expr.evaluate());
 	}
 
 	public HashMap<String, String> getPropensities() {
