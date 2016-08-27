@@ -56,6 +56,10 @@ public class Main {
 		
 		Model modelbase = generator.generatemodel(modelfile);
 
+		Model m2 = generator.generatemodel(modelfile);
+		
+		modelbase.executeReaction("ProduceGata1", 1.0);
+		m2.executeReaction("DegradeGata1", 1.0);
 		
 	}
 }

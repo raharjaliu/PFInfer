@@ -94,8 +94,12 @@ public class Model {
 		HashMap<String, Expr> changemap = reactionmap.get(name);
 		for (String key : changemap.keySet()) {
 			Double old = species.get(key);
+			//TODO: Fix Model so each has its own Variable Space
+			this.updateSpeciesVariables();
+			this.updateTunableVariables();
+			//remove these updates after fix
 			Double change = time * changemap.get(key).value();
-			// System.out.println(old + "\t" + change +"\t" + (old +change));
+			System.out.println(old + "\t" + change +"\t" + (old +change));
 			species.put(key, old + change);
 		}
 		this.updateSpeciesVariables();
@@ -105,9 +109,56 @@ public class Model {
 		Expr expr = propensitymap.get(name);
 		return (expr.value());
 	}
-	
-	public HashMap<String, String> getPropensities(){
+
+	public HashMap<String, String> getPropensities() {
 		return propensity;
+	}
+
+	public Model deepCopy() {
+		Model outmodel = new Model();
+
+		HashMap<String, Double> speciescopy = new HashMap<String, Double>(
+				species);
+		HashMap<String, Double> constantcopy = new HashMap<String, Double>(
+				constant);
+		HashMap<String, Double> tunablecopy = new HashMap<String, Double>(
+				tunable);
+		HashMap<String, HashMap<String, String>> reactioncopy = new HashMap<String, HashMap<String, String>>(
+				reaction);
+		HashMap<String, String> propensitycopy = new HashMap<String, String>(
+				propensity);
+		outmodel.overwriteSpecies(speciescopy);
+		outmodel.overwriteConstant(constantcopy);
+		outmodel.overwriteTunable(tunablecopy);
+		outmodel.overwriteReaction(reactioncopy);
+		outmodel.overwritePropensity(propensitycopy);
+
+		outmodel.pepareEvaluators();
+		outmodel.updateSpeciesVariables();
+		outmodel.updateConstantVariables();
+		outmodel.updateTunableVariables();
+
+		return outmodel;
+	}
+
+	private void overwriteSpecies(HashMap<String, Double> copy) {
+		species = copy;
+	}
+
+	private void overwriteConstant(HashMap<String, Double> copy) {
+		constant = copy;
+	}
+
+	private void overwriteTunable(HashMap<String, Double> copy) {
+		tunable = copy;
+	}
+
+	private void overwriteReaction(HashMap<String, HashMap<String, String>> copy) {
+		reaction = copy;
+	}
+
+	private void overwritePropensity(HashMap<String, String> copy) {
+		propensity = copy;
 	}
 
 }
