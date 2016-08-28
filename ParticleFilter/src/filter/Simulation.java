@@ -1,30 +1,12 @@
 package filter;
 
-import java.util.HashMap;
 
 public class Simulation {
 
 	private Model model;
 
-	private String[] reaction;
-	private Double[] propensity;
-	private HashMap<String, Integer> propMap = new HashMap<String, Integer>();
-
 	public Simulation(Model m) {
 		model = m;
-		int size = model.getPropensities().size();
-
-		reaction = new String[size];
-		propensity = new Double[size];
-
-		int counter = 0;
-		for (String name : model.getPropensities().keySet()) {
-			reaction[counter] = name;
-			propensity[counter] = model.getPropensity(name);
-			propMap.put(name, counter);
-			counter++;
-		}
-
 	}
 
 	public Model getModel() {
@@ -38,6 +20,19 @@ public class Simulation {
 
 		int reactionumber = model.getPropensities().size();
 		Double timestep = 0.0;
+
+		String[] reaction = new String[reactionumber];
+		Double[] propensity = new Double[reactionumber];
+
+		//HashMap<String, Integer> propMap = new HashMap<String, Integer>();
+
+		int counter = 0;
+		for (String name : model.getPropensities().keySet()) {
+			reaction[counter] = name;
+			propensity[counter] = model.getPropensity(name);
+			//propMap.put(name, counter);
+			counter++;
+		}
 
 		while (timestep < runTime) {
 
@@ -64,20 +59,15 @@ public class Simulation {
 			}
 
 			model.executeReaction(chosenReaction, step);
-			statistics.updateStatistic(chosenReaction, model.getPropensity(chosenReaction),
-					step);
-
+			statistics.updateStatistic(chosenReaction,
+					model.getPropensity(chosenReaction), step);
+			
 			for (int i = 0; i < reactionumber; i++) {
 				propensity[i] = model.getPropensity(reaction[i]);
 			}
 
 			timestep += step;
 		}
-
-		System.out.println(statistics.getExecutedNum().get("ProduceGata1"));
-		System.out.println(statistics.getExecutedNum().get("ProducePu1"));
-		System.out.println(statistics.getExecutedNum().get("DegradeGata1"));
-		System.out.println(statistics.getExecutedNum().get("DegradePu1"));
 
 		return statistics;
 	}

@@ -78,6 +78,7 @@ public class Xmlparser {
 		m.updateSpeciesVariables();
 		m.updateConstantVariables();
 		m.updateTunableVariables();
+		m.updateDependency();
 		return m;
 	}
 }

@@ -18,8 +18,32 @@ public class Model {
 
 	private HashMap<String, Expression> propensitymap = new HashMap<String, Expression>();
 	private HashMap<String, HashMap<String, Expression>> reactionmap = new HashMap<String, HashMap<String, Expression>>();
+
+	private Scope variablespace = Scope.create();
+
+	private HashMap<String, HashMap<String, String>> dependencymap = new HashMap<String, HashMap<String, String>>();
+
+	public void updateDependency() {
+		for (String key : reaction.keySet()) {
+			String tag = key;
+			HashMap<String, String> dependent = new HashMap<String, String>();
+			
+			for (String name : reaction.get(key).keySet()) {
+				for (String prop : propensity.keySet()){
+					String expression = propensity.get(prop);
+					if (expression.contains(name)){
+						dependent.put(prop,name);
+					}
+				}
+			}
+			dependencymap.put(tag, dependent);
+		}
+	}
 	
-	private Scope variablespace = Scope.create();   
+	public HashMap<String, HashMap<String, String>> getDepencyMap(){
+		
+		return(this.dependencymap);
+	}
 
 	public void setSpecies(String name, Double value) {
 		species.put(name, value);
@@ -32,7 +56,7 @@ public class Model {
 	public void setTunable(String name, Double value) {
 		tunable.put(name, value);
 	}
-	
+
 	public HashMap<String, Double> getTunable() {
 		return this.tunable;
 	}
@@ -48,9 +72,9 @@ public class Model {
 	public void pepareEvaluators() {
 		for (String name : propensity.keySet()) {
 			String expression = propensity.get(name);
-			Expression  expr = null;
+			Expression expr = null;
 			try {
-				expr = Parser.parse(expression,variablespace);
+				expr = Parser.parse(expression, variablespace);
 			} catch (ParseException e) {
 				System.out.println(e);
 				System.exit(1);
@@ -64,7 +88,7 @@ public class Model {
 				String expression = changemap.get(key);
 				Expression expr = null;
 				try {
-					expr = Parser.parse(expression,variablespace);
+					expr = Parser.parse(expression, variablespace);
 				} catch (ParseException e) {
 					System.out.println(e);
 					System.exit(1);
@@ -77,21 +101,21 @@ public class Model {
 
 	public void updateSpeciesVariables() {
 		for (String name : species.keySet()) {
-			Variable temp = variablespace.getVariable(name);  
+			Variable temp = variablespace.getVariable(name);
 			temp.setValue(species.get(name));
 		}
 	}
 
 	public void updateConstantVariables() {
 		for (String name : constant.keySet()) {
-			Variable temp = variablespace.getVariable(name);  
+			Variable temp = variablespace.getVariable(name);
 			temp.setValue(constant.get(name));
 		}
 	}
 
 	public void updateTunableVariables() {
 		for (String name : tunable.keySet()) {
-			Variable temp = variablespace.getVariable(name);  
+			Variable temp = variablespace.getVariable(name);
 			temp.setValue(tunable.get(name));
 		}
 	}
@@ -102,11 +126,11 @@ public class Model {
 			Double old = species.get(key);
 			Double change = time * changemap.get(key).evaluate();
 			Double newValue = old + change;
-			//System.out.println(old + "\t" + change +"\t" + newValue);
+			// System.out.println(old + "\t" + change +"\t" + newValue);
 			species.put(key, newValue);
-			Variable temp = variablespace.getVariable(key);  
+			Variable temp = variablespace.getVariable(key);
 			temp.setValue(newValue);
-			
+
 		}
 		this.updateSpeciesVariables();
 	}
@@ -117,7 +141,7 @@ public class Model {
 	}
 
 	public HashMap<String, String> getPropensities() {
-		return propensity;
+		return this.propensity;
 	}
 
 	public Model deepCopy() {

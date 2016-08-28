@@ -10,25 +10,25 @@ public class SimulationStatistics {
 
 	public SimulationStatistics(Set<String> names) {
 		for (String name : names) {
-			executedNum.put(name, 0.0);
-			propSum.put(name, 0.0);
+			this.executedNum.put(name, 0.0);
+			this.propSum.put(name, 0.0);
 		}
 	}
 
 	public HashMap<String, Double> getExecutedNum() {
-		return executedNum;
+		return this.executedNum;
 	}
 
 	public HashMap<String, Double> getPropSum() {
-		return propSum;
+		return this.propSum;
 	}
 	
 	//TODO: check if executedNum need to be updated by 1 or by time
 	public void updateStatistic (String reaction, Double propensity, Double time){
-		Double temp = executedNum.get(reaction) + 1.0;
-		executedNum.put(reaction, temp);
-		temp = propSum.get(reaction) + (time*propensity);
-		propSum.put(reaction, temp);		
+		Double temp = this.executedNum.get(reaction) + 1.0;
+		this.executedNum.put(reaction, temp);
+		temp = this.propSum.get(reaction) + (time*propensity);
+		this.propSum.put(reaction, temp);		
 	}
 
 }
