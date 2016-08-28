@@ -8,31 +8,31 @@ public class Simulation {
 	private Model model;
 
 	public Simulation(Model m) {
-		model = m;
+		this.model = m;
 	}
 
 	public Model getModel() {
-		return model;
+		return this.model;
 	}
 
 	public SimulationStatistics runSimulation(Double runTime) {
 
-		SimulationStatistics statistics = new SimulationStatistics(model
+		SimulationStatistics statistics = new SimulationStatistics(this.model
 				.getPropensities().keySet());
 
-		int reactionumber = model.getPropensities().size();
+		int reactionumber = this.model.getPropensities().size();
 		Double timestep = 0.0;
 
 		String[] reaction = new String[reactionumber];
 		Double[] propensity = new Double[reactionumber];
 
 		HashMap<String, Integer> propMap = new HashMap<String, Integer>();
-		HashMap<String, HashMap<String, String>> dependency = model.getDepencyMap();
+		HashMap<String, HashMap<String, String>> dependency = this.model.getDepencyMap();
 
 		int counter = 0;
-		for (String name : model.getPropensities().keySet()) {
+		for (String name : this.model.getPropensities().keySet()) {
 			reaction[counter] = name;
-			propensity[counter] = model.getPropensity(name);
+			propensity[counter] = this.model.getPropensity(name);
 			propMap.put(name, counter);
 			counter++;
 		}
@@ -61,9 +61,9 @@ public class Simulation {
 				}
 			}
 
-			model.executeReaction(chosenReaction, step);
+			this.model.executeReaction(chosenReaction, step);
 			statistics.updateStatistic(chosenReaction,
-					model.getPropensity(chosenReaction), step);
+					this.model.getPropensity(chosenReaction), step);
 			
 			
 			
@@ -71,7 +71,7 @@ public class Simulation {
 			
 			for (String propname : update.keySet()){
 				int i = propMap.get(propname);
-				propensity[i] = model.getPropensity(propname);
+				propensity[i] = this.model.getPropensity(propname);
 				
 			}
 

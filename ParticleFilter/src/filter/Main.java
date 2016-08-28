@@ -50,10 +50,10 @@ public class Main {
 		}
 
 		final File modelfile = new File(argumentline.getOptionValue('m'));
-		final File datafile = new File(argumentline.getOptionValue('d'));
+		//final File datafile = new File(argumentline.getOptionValue('d'));
 		
-		final int cores = Integer.parseInt(argumentline.getOptionValue('c'));
-		final int particles = Integer.parseInt(argumentline.getOptionValue('p'));
+		//final int cores = Integer.parseInt(argumentline.getOptionValue('c'));
+		//final int particles = Integer.parseInt(argumentline.getOptionValue('p'));
 		
 		Xmlparser generator = new Xmlparser();
 		
@@ -63,14 +63,19 @@ public class Main {
 		
 		Simulation sim = new Simulation(m2);
 		
-		SimulationStatistics stat = sim.runSimulation(1000.0);
+		SimulationStatistics stat = sim.runSimulation(10000.0);
 		
-		modelbase.executeReaction("ProduceGata1", 1.0);
-		modelbase.executeReaction("ProduceGata1", 1.0);
-		modelbase.executeReaction("DegradeGata1", 1.0);
+		System.out.println(stat.getExecutedNum().get("ProduceGata1"));
+		System.out.println(stat.getExecutedNum().get("ProducePu1"));
+		System.out.println(stat.getExecutedNum().get("DegradeGata1"));
+		System.out.println(stat.getExecutedNum().get("DegradePu1"));
 		
-		m2.executeReaction("DegradeGata1", 1.0);
-		m2.executeReaction("ProduceGata1", 1.0);
-		m2.executeReaction("DegradeGata1", 1.0);
+		System.out.println(stat.getPropSum().get("ProduceGata1"));
+		System.out.println(stat.getPropSum().get("ProducePu1"));
+		System.out.println(stat.getPropSum().get("DegradeGata1"));
+		System.out.println(stat.getPropSum().get("DegradePu1"));
+
+		
+
 	}
 }
