@@ -40,7 +40,7 @@ public class Particle {
 		HashMap<String, Double> tunable = model.getTunable();
 		
 		for (String thisTunable : tunable.keySet()) {
-			GammaDistribution thisGamma = gammaDistribs.get(thisTunable);
+			GammaDistribution thisGamma = this.gammaDistribs.get(thisTunable);
 			double shape = thisGamma.getShape();
 			double scale = thisGamma.getScale();
 			double newShape = shape + stats.getExecutedNum().get(thisTunable);
