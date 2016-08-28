@@ -32,6 +32,10 @@ public class Model {
 	public void setTunable(String name, Double value) {
 		tunable.put(name, value);
 	}
+	
+	public HashMap<String, Double> getTunable() {
+		return this.tunable;
+	}
 
 	public void setReaction(String name, HashMap<String, String> reactionmap) {
 		reaction.put(name, reactionmap);
