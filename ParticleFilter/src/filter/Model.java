@@ -23,28 +23,6 @@ public class Model {
 
 	private HashMap<String, HashMap<String, String>> dependencymap = new HashMap<String, HashMap<String, String>>();
 
-	public void updateDependency() {
-		for (String key : reaction.keySet()) {
-			String tag = key;
-			HashMap<String, String> dependent = new HashMap<String, String>();
-			
-			for (String name : reaction.get(key).keySet()) {
-				for (String prop : propensity.keySet()){
-					String expression = propensity.get(prop);
-					if (expression.contains(name)){
-						dependent.put(prop,name);
-					}
-				}
-			}
-			dependencymap.put(tag, dependent);
-		}
-	}
-	
-	public HashMap<String, HashMap<String, String>> getDepencyMap(){
-		
-		return(this.dependencymap);
-	}
-
 	public void setSpecies(String name, Double value) {
 		species.put(name, value);
 	}
@@ -143,6 +121,28 @@ public class Model {
 	public HashMap<String, String> getPropensities() {
 		return this.propensity;
 	}
+	
+	public void updateDependency() {
+		for (String key : reaction.keySet()) {
+			String tag = key;
+			HashMap<String, String> dependent = new HashMap<String, String>();
+
+			for (String name : reaction.get(key).keySet()) {
+				for (String prop : propensity.keySet()) {
+					String expression = propensity.get(prop);
+					if (expression.contains(name)) {
+						dependent.put(prop, name);
+					}
+				}
+			}
+			this.dependencymap.put(tag, dependent);
+		}
+	}
+
+	public HashMap<String, HashMap<String, String>> getDepencyMap() {
+		return (this.dependencymap);
+	}
+
 
 	public Model deepCopy() {
 		Model outmodel = new Model();
@@ -157,11 +157,15 @@ public class Model {
 				reaction);
 		HashMap<String, String> propensitycopy = new HashMap<String, String>(
 				propensity);
+		HashMap<String, HashMap<String, String>> dependencycopy = new HashMap<String, HashMap<String, String>>(
+				dependencymap);
+
 		outmodel.overwriteSpecies(speciescopy);
 		outmodel.overwriteConstant(constantcopy);
 		outmodel.overwriteTunable(tunablecopy);
 		outmodel.overwriteReaction(reactioncopy);
 		outmodel.overwritePropensity(propensitycopy);
+		outmodel.overwriteDependency(dependencycopy);
 
 		outmodel.pepareEvaluators();
 		outmodel.updateSpeciesVariables();
@@ -189,6 +193,11 @@ public class Model {
 
 	private void overwritePropensity(HashMap<String, String> copy) {
 		propensity = copy;
+	}
+
+	private void overwriteDependency(
+			HashMap<String, HashMap<String, String>> copy) {
+		dependencymap = copy;
 	}
 
 }

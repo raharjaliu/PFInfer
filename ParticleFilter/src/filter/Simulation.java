@@ -1,5 +1,7 @@
 package filter;
 
+import java.util.HashMap;
+
 
 public class Simulation {
 
@@ -24,13 +26,14 @@ public class Simulation {
 		String[] reaction = new String[reactionumber];
 		Double[] propensity = new Double[reactionumber];
 
-		//HashMap<String, Integer> propMap = new HashMap<String, Integer>();
+		HashMap<String, Integer> propMap = new HashMap<String, Integer>();
+		HashMap<String, HashMap<String, String>> dependency = model.getDepencyMap();
 
 		int counter = 0;
 		for (String name : model.getPropensities().keySet()) {
 			reaction[counter] = name;
 			propensity[counter] = model.getPropensity(name);
-			//propMap.put(name, counter);
+			propMap.put(name, counter);
 			counter++;
 		}
 
@@ -62,8 +65,14 @@ public class Simulation {
 			statistics.updateStatistic(chosenReaction,
 					model.getPropensity(chosenReaction), step);
 			
-			for (int i = 0; i < reactionumber; i++) {
-				propensity[i] = model.getPropensity(reaction[i]);
+			
+			
+			HashMap<String, String> update = dependency.get(chosenReaction);
+			
+			for (String propname : update.keySet()){
+				int i = propMap.get(propname);
+				propensity[i] = model.getPropensity(propname);
+				
 			}
 
 			timestep += step;
