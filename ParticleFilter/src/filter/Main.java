@@ -1,6 +1,6 @@
 package filter;
 
-import java.io.File;
+import java.io.IOException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -9,9 +9,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-
-import filter.Model;
-import filter.Xmlparser;
 
 public class Main {
 
@@ -44,42 +41,21 @@ public class Main {
 
 		} catch (ParseException exp) {
 			System.err.println("Parsing failed.  Reason: " + exp.getMessage());
-			formatter.printHelp("ParticleFilter", header, options, footer,
-					true);
+			formatter
+					.printHelp("ParticleFilter", header, options, footer, true);
 			System.exit(1);
 		}
 
-		File modelfile = new File(argumentline.getOptionValue('m'));
-		//final File datafile = new File(argumentline.getOptionValue('d'));
-		
-		//final int cores = Integer.parseInt(argumentline.getOptionValue('c'));
-		//final int particles = Integer.parseInt(argumentline.getOptionValue('p'));
-		
-		Xmlparser generator = new Xmlparser();
-		
-		Model modelbase = generator.generatemodel(modelfile);
-
-		Model m2 = modelbase.deepCopy();
-		
-		Simulation sim = new Simulation(m2);
-		
-		Particle particle = new Particle(sim);
-		
-		SimulationStatistics stat  = particle.runSimulation(10000);
-		
-//		stat = sim.runSimulation(10000.0);
-		
-		System.out.println(stat.getExecutedNum().get("ProduceGata1"));
-		System.out.println(stat.getExecutedNum().get("ProducePu1"));
-		System.out.println(stat.getExecutedNum().get("DegradeGata1"));
-		System.out.println(stat.getExecutedNum().get("DegradePu1"));
-		
-		System.out.println(stat.getPropSum().get("ProduceGata1"));
-		System.out.println(stat.getPropSum().get("ProducePu1"));
-		System.out.println(stat.getPropSum().get("DegradeGata1"));
-		System.out.println(stat.getPropSum().get("DegradePu1"));
-
-		
+		try {
+			ParticleFilter pf = new ParticleFilter(
+					argumentline.getOptionValue('m'),
+					argumentline.getOptionValue('d'),
+					Integer.parseInt(argumentline.getOptionValue('p')),
+					Integer.parseInt(argumentline.getOptionValue('c')));
+			pf.run();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 	}
 }
