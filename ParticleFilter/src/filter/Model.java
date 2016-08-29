@@ -1,6 +1,7 @@
 package filter;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 import parsii.eval.Expression;
 import parsii.eval.Parser;
@@ -23,29 +24,28 @@ public class Model {
 
 	private HashMap<String, HashMap<String, String>> dependencymap = new HashMap<String, HashMap<String, String>>();
 
-	public HashMap<String, HashMap<String, String>> getTunableReactionMap (){
-		
-		HashMap<String, HashMap<String, String>> outmap = new HashMap<String, HashMap<String, String>>();
-		
+	public HashMap<String, HashSet<String>> getTunableReactionMap() {
 
-		
+		HashMap<String, HashSet<String>> outmap = new HashMap<String, HashSet<String>>();
+
 		for (String tunablename : this.tunable.keySet()) {
-			HashMap<String, String> reactionMap = new HashMap<String, String>();
+			HashSet<String> reactionMap = new HashSet<String>();
 			for (String reactioname : this.reaction.keySet()) {
-				for (String subreaction : this.reaction.get(reactioname).keySet()) {				
-					String expression = this.reaction.get(reactioname).get(subreaction);
-					if(expression.contains(tunablename)){
-						reactionMap.put(reactioname,subreaction);
-						System.out.println(tunablename + "\t" + reactioname);
+				for (String subreaction : this.reaction.get(reactioname)
+						.keySet()) {
+					String expression = this.reaction.get(reactioname).get(
+							subreaction);
+					if (expression.contains(tunablename)) {
+						reactionMap.add(reactioname);
+						// System.out.println(tunablename + "\t" + reactioname);
 					}
 				}
 			}
-			outmap.put(tunablename,reactionMap);		
+			outmap.put(tunablename, reactionMap);
 		}
-		
 		return outmap;
 	}
-	
+
 	public void setSpecies(String name, Double value) {
 		this.species.put(name, value);
 	}

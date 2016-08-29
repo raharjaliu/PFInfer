@@ -1,6 +1,7 @@
 package filter;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import org.apache.commons.math3.distribution.GammaDistribution;
@@ -34,15 +35,30 @@ public class Particle {
 		
 		Model model = this.simulation.getModel();
 		HashMap<String, Double> tunable = model.getTunable();
+		HashMap<String, HashSet<String>> tunableReactionMap = model.getTunableReactionMap();
 		
 		for (String thisTunable : tunable.keySet()) {
 			GammaDistribution thisGamma = this.gammaDistribs.get(thisTunable);
 			double shape = thisGamma.getShape();
 			double scale = thisGamma.getScale();
-			double newShape = shape + stats.getExecutedNum().get(thisTunable);
-			double newScale = 1/((1/scale) + stats.getPropSum().get(thisTunable)); // rate := 1 / scale!!
+			
+			HashSet<String> reactions = tunableReactionMap.get(thisTunable);
+			
+			// gamma update
+			double newShape = shape;
+			double newScale = 1/scale;
+			for (String reaction : reactions) {
+				newShape += stats.getExecutedNum().get(reaction);
+				newScale += stats.getPropSum().get(reaction);
+			}
+			newScale = 1/newScale;
 			thisGamma = new GammaDistribution(newShape, newScale);
 			this.gammaDistribs.put(thisTunable, thisGamma);
+			
+//			double newShape = shape + stats.getExecutedNum().get(model.thisTunable));
+//			double newScale = 1/((1/scale) + stats.getPropSum().get(model.thisTunable)); // rate := 1 / scale!!
+			
+			// gamma sample
 			double newTunable = thisGamma.sample();
 			this.simulation.getModel().setTunable(thisTunable, newTunable);
 		}
