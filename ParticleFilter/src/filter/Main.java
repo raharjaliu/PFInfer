@@ -49,7 +49,7 @@ public class Main {
 			System.exit(1);
 		}
 
-		final File modelfile = new File(argumentline.getOptionValue('m'));
+		File modelfile = new File(argumentline.getOptionValue('m'));
 		//final File datafile = new File(argumentline.getOptionValue('d'));
 		
 		//final int cores = Integer.parseInt(argumentline.getOptionValue('c'));
@@ -63,7 +63,11 @@ public class Main {
 		
 		Simulation sim = new Simulation(m2);
 		
-		SimulationStatistics stat = sim.runSimulation(10000.0);
+		Particle particle = new Particle(sim);
+		
+		SimulationStatistics stat  = particle.runSimulation(10000);
+		
+//		stat = sim.runSimulation(10000.0);
 		
 		System.out.println(stat.getExecutedNum().get("ProduceGata1"));
 		System.out.println(stat.getExecutedNum().get("ProducePu1"));

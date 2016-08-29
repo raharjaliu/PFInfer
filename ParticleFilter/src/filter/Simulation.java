@@ -36,6 +36,9 @@ public class Simulation {
 			propMap.put(name, counter);
 			counter++;
 		}
+		
+		System.out.println("Starting simulation. Remaining time: " + runTime);
+		int runCount = 0;
 
 		while (timestep < runTime) {
 
@@ -76,6 +79,10 @@ public class Simulation {
 			}
 
 			timestep += step;
+			
+			if (++runCount % 100000 == 0) {
+				System.out.println("Run count: " + runCount + ". Time remaining: " + (runTime - timestep));
+			}
 		}
 
 		return statistics;

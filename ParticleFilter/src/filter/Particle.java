@@ -49,10 +49,12 @@ public class Particle {
 		
 	}
 	
-	public void runSimulation(double t) {
+	public SimulationStatistics runSimulation(double t) {
 		
 		SimulationStatistics stats = this.simulation.runSimulation(t);
 		gammaUpdateAndSample(stats);
+		
+		return stats;
 	}
 
 }
