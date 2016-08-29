@@ -42,6 +42,7 @@ public class Particle {
 			double newShape = shape + stats.getExecutedNum().get(thisTunable);
 			double newScale = 1/((1/scale) + stats.getPropSum().get(thisTunable)); // rate := 1 / scale!!
 			thisGamma = new GammaDistribution(newShape, newScale);
+			this.gammaDistribs.put(thisTunable, thisGamma);
 			double newTunable = thisGamma.sample();
 			this.simulation.getModel().setTunable(thisTunable, newTunable);
 		}
