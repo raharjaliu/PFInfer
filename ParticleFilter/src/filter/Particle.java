@@ -30,10 +30,6 @@ public class Particle {
 		
 	}
 	
-//	public Simulation getSimulation() {
-//		return this.simulation;
-//	}
-	
 	public void gammaUpdateAndSample(SimulationStatistics stats) {
 		
 		Model model = this.simulation.getModel();
