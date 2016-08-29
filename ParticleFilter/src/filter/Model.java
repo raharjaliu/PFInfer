@@ -23,22 +23,24 @@ public class Model {
 
 	private HashMap<String, HashMap<String, String>> dependencymap = new HashMap<String, HashMap<String, String>>();
 
-	public HashMap<String, HashMap<String, String>> getReactionTunableMap (){
+	public HashMap<String, HashMap<String, String>> getTunableReactionMap (){
 		
 		HashMap<String, HashMap<String, String>> outmap = new HashMap<String, HashMap<String, String>>();
 		
-		for (String reactionname : this.reaction.keySet()) {
-			HashMap<String, String> tunableMap = new HashMap<String, String>();
-			for (String subreaction : this.reaction.get(reactionname).keySet()) {
-				String expression = this.reaction.get(reactionname).get(subreaction);
-				for (String name : this.tunable.keySet()) {
-					if(expression.contains(name)){
-						tunableMap.put(name, subreaction);
-						System.out.println(reactionname + "\t" + name);
+
+		
+		for (String tunablename : this.tunable.keySet()) {
+			HashMap<String, String> reactionMap = new HashMap<String, String>();
+			for (String reactioname : this.reaction.keySet()) {
+				for (String subreaction : this.reaction.get(reactioname).keySet()) {				
+					String expression = this.reaction.get(reactioname).get(subreaction);
+					if(expression.contains(tunablename)){
+						reactionMap.put(reactioname,subreaction);
+						System.out.println(tunablename + "\t" + reactioname);
 					}
 				}
 			}
-			outmap.put(reactionname,tunableMap);		
+			outmap.put(tunablename,reactionMap);		
 		}
 		
 		return outmap;
