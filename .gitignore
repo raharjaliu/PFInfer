@@ -63,3 +63,8 @@ target/
 
 #IDEA file
 .idea/
+
+#Project specific
+ParticleFilter/.classpath
+ParticleFilter/.project
+ParticleFilter/bin/
