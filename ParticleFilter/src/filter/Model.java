@@ -45,6 +45,10 @@ public class Model {
 		}
 		return outmap;
 	}
+	
+	public Double getSpecies (String name){
+		return this.species.get(name);
+	}
 
 	public void setSpecies(String name, Double value) {
 		this.species.put(name, value);
@@ -124,9 +128,13 @@ public class Model {
 	public void executeReaction(String name, Double time) {
 		HashMap<String, Expression> changemap = this.reactionmap.get(name);
 		for (String key : changemap.keySet()) {
-			Double old = this.species.get(key);
+			Double old = this.species.get(key);		
 			Double change = time * changemap.get(key).evaluate();
 			Double newValue = old + change;
+			if(newValue < 0){
+				System.err.println("something is fishy!!! species " + key +"  below 0.0");
+			}
+			
 			this.species.put(key, newValue);
 			Variable temp = this.variablespace.getVariable(key);
 			temp.setValue(newValue);

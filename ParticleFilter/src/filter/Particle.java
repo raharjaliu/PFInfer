@@ -23,6 +23,10 @@ public class Particle {
 		}
 	}
 	
+	public Double getConcentration(String speciesname){
+		return this.simulation.getModel().getSpecies(speciesname);
+	}
+	
 	public Particle deepCopy() {
 		
 		Model mod = this.simulation.getModel().deepCopy();

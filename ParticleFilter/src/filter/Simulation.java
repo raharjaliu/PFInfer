@@ -43,7 +43,7 @@ public class Simulation {
 		while (timestep < runTime) {
 
 			Double combinedPropensities = 0.0;
-			for (int i = 0; i < reactionumber; i++) {
+			for (int i = 0; i < reactionumber; i++) {			
 				combinedPropensities += propensity[i];
 			}
 
@@ -55,11 +55,12 @@ public class Simulation {
 
 			String chosenReaction = "";
 			Double currentReaction = 0.0;
-
+			
 			for (int i = 0; i < reactionumber; i++) {
 				currentReaction += propensity[i];
 				if (propCutoff < currentReaction) {
 					chosenReaction = reaction[i];
+					//System.out.println("chose "+chosenReaction + "!");
 					break;
 				}
 			}

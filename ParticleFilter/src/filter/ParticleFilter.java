@@ -6,6 +6,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+
+import org.apache.commons.math3.distribution.NormalDistribution;
 
 public class ParticleFilter {
 
@@ -16,6 +19,8 @@ public class ParticleFilter {
 	private int threadNum;
 	private int particleNum;
 	private BufferedReader dbr;
+	
+	private double deviation = 5.0;
 
 	public ParticleFilter(String model, String data, int n, int _threadNum)
 			throws IOException {
@@ -27,7 +32,7 @@ public class ParticleFilter {
 		String line = this.dbr.readLine();
 		String[] cols = line.split("\t");
 		this.nameToColnumMap = new HashMap<>();
-		for (int i = 1; i < cols.length; i++) {
+		for (int i = 0; i < cols.length; i++) {
 			this.nameToColnumMap.put(cols[i], i);
 		}
 		
@@ -52,7 +57,7 @@ public class ParticleFilter {
 		this.dbr.readLine();
 		
 		int dataPointCounter = 0;
-		double last = Double.parseDouble(this.dbr.readLine().split("\t")[0]);
+		double last = Double.parseDouble(this.dbr.readLine().split("\t")[nameToColnumMap.get("time")]);
 		String line;
 
 		while ((line = this.dbr.readLine()) != null) {
@@ -62,7 +67,7 @@ public class ParticleFilter {
 			int particleCounter = 0;
 			System.out.println("Data point #" + ++dataPointCounter);
 			
-			double current = Double.parseDouble(line.split("\t")[0]);
+			double current = Double.parseDouble(line.split("\t")[nameToColnumMap.get("time")]);
 			double runTime = current - last;
 			last = current;
 
@@ -73,20 +78,70 @@ public class ParticleFilter {
 
 				SimulationStatistics stat = p.runSimulation(runTime);
 
-				System.out.println(stat.getExecutedNum().get("ProduceGata1"));
-				System.out.println(stat.getExecutedNum().get("ProducePu1"));
-				System.out.println(stat.getExecutedNum().get("DegradeGata1"));
-				System.out.println(stat.getExecutedNum().get("DegradePu1"));
-
-				System.out.println(stat.getPropSum().get("ProduceGata1"));
-				System.out.println(stat.getPropSum().get("ProducePu1"));
-				System.out.println(stat.getPropSum().get("DegradeGata1"));
-				System.out.println(stat.getPropSum().get("DegradePu1"));
+//				System.out.println(stat.getExecutedNum().get("ProduceGata1"));
+//				System.out.println(stat.getExecutedNum().get("ProducePu1"));
+//				System.out.println(stat.getExecutedNum().get("DegradeGata1"));
+//				System.out.println(stat.getExecutedNum().get("DegradePu1"));
+//
+//				System.out.println(stat.getPropSum().get("ProduceGata1"));
+//				System.out.println(stat.getPropSum().get("ProducePu1"));
+//				System.out.println(stat.getPropSum().get("DegradeGata1"));
+//				System.out.println(stat.getPropSum().get("DegradePu1"));
 			}
 			
-			// TODO particle weighting
+			//Creating Map of SpeciesDistribution for the current timestep
 			
-			// TODO particle "refill"/reselection
+			HashMap<String, NormalDistribution> speciesDist = new HashMap<String, NormalDistribution>();
+			String[] cols = line.split("\t");
+			for (String colname : this.nameToColnumMap.keySet()) {
+				Double mean = Double.parseDouble(cols[nameToColnumMap.get(colname)]);
+				NormalDistribution temp = new NormalDistribution(mean, deviation);
+				speciesDist.put(colname,temp);
+			}
+			speciesDist.remove("time");
+			
+			//Particle weighting
+			//TODO assert that order of particles in particleList and particleWeights are synchronized
+			ArrayList<Double> particleWeights = new ArrayList<>();
+			
+			Double weightSum = 0.0;
+			
+			for (Particle p : this.particleList) {
+				Double combinedweight = 0.0;
+				for (String species : speciesDist.keySet()) {
+					combinedweight += speciesDist.get(species).density(p.getConcentration(species));
+				}
+				weightSum += combinedweight;
+				particleWeights.add(combinedweight);
+			}
+						
+			// Sample Particles based on particleWeights
+			
+			ArrayList<Particle> newParticleList = new ArrayList<>();
+			
+			HashSet<Integer> trackChosen = new HashSet<Integer>();
+			
+			for (int i = 0; i < particleList.size(); i++) {
+				Double weigthCutoff = (Math.random()) * weightSum;
+				Double currentParticle = 0.0;
+				for (int j = 0; j < particleWeights.size(); j++) {
+					currentParticle += particleWeights.get(j);
+					if (weigthCutoff < currentParticle) {
+						newParticleList.add(particleList.get(j).deepCopy());
+						trackChosen.add(j);
+						break;
+					}
+				}
+			}
+			
+			System.out.println("Collapsed " + particleList.size() + " particles onto " + trackChosen.size() +" chosen particles");
+			
+			//THIS Works
+			//But eventually Kdg and Kdp get so big that they degrade more than is available resulting in negative concentration ... 
+			//resulting in negative propensities .... resulting in no reaction being chosen ... resulting in an null pointer exception
+			
+			//this.particleList = newParticleList;
+			
 			
 		}
 
