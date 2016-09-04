@@ -1,12 +1,15 @@
 package filter;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
@@ -23,11 +26,22 @@ public class Main {
 		Option option4 = Option.builder("c").required(true).hasArg(true)
 				.longOpt("Cores").desc("Number of threads").build();
 
+		Option option5 = Option.builder("s").required(false).hasArg(false)
+				.longOpt("Silent").desc("Silences Sys.out Stream").build();
+		Option option6 = Option.builder("v").required(false).hasArg(false)
+				.longOpt("Verbose").desc("Expands Sys.out Stream").build();
+
 		Options options = new Options();
 		options.addOption(option1);
 		options.addOption(option2);
 		options.addOption(option3);
 		options.addOption(option4);
+
+		OptionGroup exclusiveOutSreamSettings = new OptionGroup();
+		exclusiveOutSreamSettings.addOption(option5);
+		exclusiveOutSreamSettings.addOption(option6);
+
+		options.addOptionGroup(exclusiveOutSreamSettings);
 
 		String header = "Parametrize Model for Time series Data\n\n";
 		String footer = "\n";
@@ -44,6 +58,14 @@ public class Main {
 			formatter
 					.printHelp("ParticleFilter", header, options, footer, true);
 			System.exit(1);
+		}
+
+		if (argumentline.hasOption('s')) {
+			System.setOut(new PrintStream(new OutputStream() {
+				@Override
+				public void write(int b) throws IOException {
+				}
+			}));
 		}
 
 		try {

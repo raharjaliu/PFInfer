@@ -11,7 +11,24 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+/**
+ * 
+ * Class used to create and initialize an instance of {@link Model} by parsing
+ * an Model.xml file, which contains the model definition.
+ * 
+ * @author Rene Schoeffel
+ */
 public class Xmlparser {
+
+	/**
+	 * Return new initialized instance of {@link Model}.
+	 * 
+	 * @param Xmlfile
+	 *            containing all species concentrations, reactions and
+	 *            propensity functions, as well as tunable and constant rate
+	 *            parameters
+	 * @return new initialized instance of {@link Model}
+	 */
 
 	public Model generatemodel(File xmlfile) {
 
@@ -73,7 +90,7 @@ public class Xmlparser {
 				}
 			}
 			m.setReaction(tag, reactionmap);
-		}	
+		}
 		m.pepareEvaluators();
 		m.updateSpeciesVariables();
 		m.updateConstantVariables();
