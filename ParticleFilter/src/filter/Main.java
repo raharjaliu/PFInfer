@@ -14,6 +14,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 public class Main {
+	
+	public static boolean verbose = false;
 
 	public static void main(String[] args) {
 
@@ -67,7 +69,10 @@ public class Main {
 				}
 			}));
 		}
-
+		if (argumentline.hasOption('v')) {
+			Main.verbose = true;
+		}
+		
 		try {
 			ParticleFilter pf = new ParticleFilter(
 					argumentline.getOptionValue('m'),

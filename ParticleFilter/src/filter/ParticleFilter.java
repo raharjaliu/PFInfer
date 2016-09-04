@@ -104,15 +104,18 @@ public class ParticleFilter {
 
 				SimulationStatistics stat = p.runSimulation(runTime);
 
-				// System.out.println(stat.getExecutedNum().get("ProduceGata1"));
-				// System.out.println(stat.getExecutedNum().get("ProducePu1"));
-				// System.out.println(stat.getExecutedNum().get("DegradeGata1"));
-				// System.out.println(stat.getExecutedNum().get("DegradePu1"));
-				//
-				// System.out.println(stat.getPropSum().get("ProduceGata1"));
-				// System.out.println(stat.getPropSum().get("ProducePu1"));
-				// System.out.println(stat.getPropSum().get("DegradeGata1"));
-				// System.out.println(stat.getPropSum().get("DegradePu1"));
+				if (Main.verbose){
+					System.out.println("ProduceGata1 " + stat.getExecutedNum().get("ProduceGata1"));
+					System.out.println("ProducePu1 " + stat.getExecutedNum().get("ProducePu1"));
+					System.out.println("DegradeGata1 " + stat.getExecutedNum().get("DegradeGata1"));
+					System.out.println("DegradePu1 " + stat.getExecutedNum().get("DegradePu1"));
+					
+					System.out.println("ProduceGata1 " + stat.getPropSum().get("ProduceGata1"));
+					System.out.println("ProducePu1 " + stat.getPropSum().get("ProducePu1"));
+					System.out.println("DegradeGata1 " + stat.getPropSum().get("DegradeGata1"));
+					System.out.println("DegradePu1 " + stat.getPropSum().get("DegradePu1"));
+				}
+				
 			}
 
 			// Creating Map of SpeciesDistribution for the current timestep
