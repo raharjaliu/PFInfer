@@ -30,18 +30,22 @@ public class ParticleFilter {
 	private int particleNum;
 	private BufferedReader dbr;
 
-	private double deviation = 5.0;
+	private double deviation = 2.0;
 
 	/**
 	 * Initializes {@link ParticleFilter}
 	 * 
-	 * @param model Path to Model.xml file
-	 * @param data Path to Data file
-	 * @param n Number of Particles used in each Iteration
-	 * @param _threadNum Number of allowed threads
+	 * @param model
+	 *            Path to Model.xml file
+	 * @param data
+	 *            Path to Data file
+	 * @param n
+	 *            Number of Particles used in each Iteration
+	 * @param _threadNum
+	 *            Number of allowed threads
 	 * 
 	 */
-	
+
 	public ParticleFilter(String model, String data, int n, int _threadNum)
 			throws IOException {
 
@@ -71,11 +75,10 @@ public class ParticleFilter {
 		this.threadNum = _threadNum;
 	}
 
-	
 	/**
-	 * Perform the ParticleFilter Algorithm for instance of {@ ParticleFilter}
+	 * Perform the ParticleFilter Algorithm for instance of @ ParticleFilter}
 	 */
-	
+
 	public void run() throws IOException {
 
 		this.dbr.readLine();
@@ -104,18 +107,26 @@ public class ParticleFilter {
 
 				SimulationStatistics stat = p.runSimulation(runTime);
 
-				if (Main.verbose){
-					System.out.println("ProduceGata1 " + stat.getExecutedNum().get("ProduceGata1"));
-					System.out.println("ProducePu1 " + stat.getExecutedNum().get("ProducePu1"));
-					System.out.println("DegradeGata1 " + stat.getExecutedNum().get("DegradeGata1"));
-					System.out.println("DegradePu1 " + stat.getExecutedNum().get("DegradePu1"));
-					
-					System.out.println("ProduceGata1 " + stat.getPropSum().get("ProduceGata1"));
-					System.out.println("ProducePu1 " + stat.getPropSum().get("ProducePu1"));
-					System.out.println("DegradeGata1 " + stat.getPropSum().get("DegradeGata1"));
-					System.out.println("DegradePu1 " + stat.getPropSum().get("DegradePu1"));
+				if (Main.verbose) {
+					System.out.println("ExecutionNumber ProduceGata1 \t"
+							+ stat.getExecutedNum().get("ProduceGata1"));
+					System.out.println("ExecutionNumber ProducePu1 \t"
+							+ stat.getExecutedNum().get("ProducePu1"));
+					System.out.println("ExecutionNumber DegradeGata1 \t"
+							+ stat.getExecutedNum().get("DegradeGata1"));
+					System.out.println("ExecutionNumber DegradePu1 \t"
+							+ stat.getExecutedNum().get("DegradePu1"));
+
+					System.out.println("PropensitySum ProduceGata1 \t"
+							+ stat.getPropSum().get("ProduceGata1"));
+					System.out.println("PropensitySum ProducePu1 \t"
+							+ stat.getPropSum().get("ProducePu1"));
+					System.out.println("PropensitySum DegradeGata1 \t"
+							+ stat.getPropSum().get("DegradeGata1"));
+					System.out.println("PropensitySum DegradePu1 \t"
+							+ stat.getPropSum().get("DegradePu1"));
 				}
-				
+
 			}
 
 			// Creating Map of SpeciesDistribution for the current timestep
@@ -177,7 +188,9 @@ public class ParticleFilter {
 			// resulting in negative propensities .... resulting in no reaction
 			// being chosen ... resulting in an null pointer exception
 
-			// this.particleList = newParticleList;
+			//this.particleList = newParticleList;
+			
+			
 
 		}
 

@@ -61,7 +61,20 @@ public class Particle {
 
 		Model mod = this.simulation.getModel().deepCopy();
 		Simulation sim = new Simulation(mod);
-		return new Particle(sim);
+		
+		Map<String, GammaDistribution> newGammaDistribs = new HashMap<String, GammaDistribution>();
+		
+		for (String thisgamma : this.gammaDistribs.keySet()) {
+			Double shape =  this.gammaDistribs.get(thisgamma).getShape();
+			Double scale = this.gammaDistribs.get(thisgamma).getScale();
+			newGammaDistribs.put(thisgamma, new GammaDistribution(shape, scale));			
+		}
+		
+		Particle copy= new Particle (sim);
+		copy.gammaDistribs = newGammaDistribs;
+		
+		
+		return copy;
 
 	}
 
@@ -73,6 +86,7 @@ public class Particle {
 	 * 
 	 * @param stats
 	 */
+	
 	public void gammaUpdateAndSample(SimulationStatistics stats) {
 
 		Model model = this.simulation.getModel();
@@ -98,7 +112,13 @@ public class Particle {
 			newScale = 1 / newScale;
 			thisGamma = new GammaDistribution(newShape, newScale);
 			this.gammaDistribs.put(thisTunable, thisGamma);
-
+			if (Main.verbose) {
+				System.out.println(thisTunable + " \t oldshape: " + shape
+						+ "\t newshape: " + newShape + "\t oldscale: " + scale
+						+ "\t newscale: " + newScale + "\t oldmean: "
+						+ (shape * scale) + "\t newmean: "
+						+ (newShape * newScale));
+			}
 			// double newShape = shape +
 			// stats.getExecutedNum().get(model.thisTunable));
 			// double newScale = 1/((1/scale) +
@@ -108,6 +128,10 @@ public class Particle {
 			// gamma sample
 			double newTunable = thisGamma.sample();
 			this.simulation.getModel().setTunable(thisTunable, newTunable);
+			
+			
+			//Model needs to load updates Tunables into Variablespace used by evaluators
+			//model.updateTunableVariables();
 		}
 
 	}
