@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 
@@ -25,6 +26,7 @@ public class ParticleFilter {
 	public static double RUN_TIME = 100000;
 
 	private ArrayList<Particle> particleList;
+	private ArrayList<ReentrantLock> lockList;
 	private HashMap<String, Integer> nameToColnumMap;
 	private int threadNum;
 	private int particleNum;
@@ -63,12 +65,21 @@ public class ParticleFilter {
 		Xmlparser generator = new Xmlparser();
 		Model m = generator.generatemodel(modelFile);
 		Simulation sim = new Simulation(m);
-		Particle particle = new Particle(sim);
+		
+		// ReentrantLocks initialization and assignment
+		this.lockList = new ArrayList<ReentrantLock>();
+		for (int i = 0; i < this.threadNum; i++) {
+			this.lockList.add(new ReentrantLock());
+		}
+		
+		int counter = 0;
+		Particle particle = new Particle(sim, this.lockList.get(counter));
 
 		this.particleList = new ArrayList<>();
 		this.particleList.add(particle);
 		for (int i = 1; i < n; i++) {
-			this.particleList.add(particle.deepCopy());
+			counter += counter; 
+			this.particleList.add(particle.deepCopy(this.lockList.get(counter % this.lockList.size())));
 		}
 
 		this.particleNum = n;
@@ -80,7 +91,7 @@ public class ParticleFilter {
 	 */
 
 	public void run() throws IOException {
-
+		
 		this.dbr.readLine();
 
 		int dataPointCounter = 0;
@@ -105,29 +116,22 @@ public class ParticleFilter {
 
 				System.out.println("Running partile #" + ++particleCounter);
 
-				SimulationStatistics stat = p.runSimulation(runTime);
-
-				if (Main.verbose) {
-					System.out.println("ExecutionNumber ProduceGata1 \t"
-							+ stat.getExecutedNum().get("ProduceGata1"));
-					System.out.println("ExecutionNumber ProducePu1 \t"
-							+ stat.getExecutedNum().get("ProducePu1"));
-					System.out.println("ExecutionNumber DegradeGata1 \t"
-							+ stat.getExecutedNum().get("DegradeGata1"));
-					System.out.println("ExecutionNumber DegradePu1 \t"
-							+ stat.getExecutedNum().get("DegradePu1"));
-
-					System.out.println("PropensitySum ProduceGata1 \t"
-							+ stat.getPropSum().get("ProduceGata1"));
-					System.out.println("PropensitySum ProducePu1 \t"
-							+ stat.getPropSum().get("ProducePu1"));
-					System.out.println("PropensitySum DegradeGata1 \t"
-							+ stat.getPropSum().get("DegradeGata1"));
-					System.out.println("PropensitySum DegradePu1 \t"
-							+ stat.getPropSum().get("DegradePu1"));
-				}
+				p.setRunSimulationTime(runTime);
+				new Thread(p).start();
+				
+//				SimulationStatistics stat = p.runSimulation(runTime);
 
 			}
+			
+			// checks whether all locks are free (i.e. all particle filters were run)
+			for (ReentrantLock l : this.lockList) {
+				l.lock();
+			}
+			
+			for (ReentrantLock l : this.lockList) {
+				l.unlock();
+			}
+			
 
 			// Creating Map of SpeciesDistribution for the current timestep
 
@@ -164,6 +168,8 @@ public class ParticleFilter {
 			ArrayList<Particle> newParticleList = new ArrayList<>();
 
 			HashSet<Integer> trackChosen = new HashSet<Integer>();
+			
+			int counter = 0;
 
 			for (int i = 0; i < particleList.size(); i++) {
 				Double weigthCutoff = (Math.random()) * weightSum;
@@ -171,7 +177,8 @@ public class ParticleFilter {
 				for (int j = 0; j < particleWeights.size(); j++) {
 					currentParticle += particleWeights.get(j);
 					if (weigthCutoff < currentParticle) {
-						newParticleList.add(particleList.get(j).deepCopy());
+						ReentrantLock lock = this.lockList.get(counter % this.lockList.size());
+						newParticleList.add(particleList.get(j).deepCopy(lock));
 						trackChosen.add(j);
 						break;
 					}

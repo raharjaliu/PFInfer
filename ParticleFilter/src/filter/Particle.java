@@ -3,6 +3,7 @@ package filter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.math3.distribution.GammaDistribution;
 
@@ -14,10 +15,12 @@ import org.apache.commons.math3.distribution.GammaDistribution;
  * 
  * @author Pandu Raharja-Liu
  */
-public class Particle {
+public class Particle implements Runnable {
 
 	private Simulation simulation;
 	private Map<String, GammaDistribution> gammaDistribs;
+	private double nextSimulationTime;
+	private ReentrantLock lock;
 
 	/**
 	 * Initializes {@link Particle}
@@ -25,9 +28,11 @@ public class Particle {
 	 * @param _simulation
 	 *            an instance of {@link Simulation} that is associated with this
 	 *            Particle
+	 * @param lock
 	 */
-	public Particle(Simulation _simulation) {
+	public Particle(Simulation _simulation, ReentrantLock _lock) {
 		this.simulation = _simulation;
+		this.lock = _lock;
 		this.gammaDistribs = new HashMap<String, GammaDistribution>();
 
 		HashMap<String, Double> tunables = _simulation.getModel().getTunable();
@@ -54,26 +59,28 @@ public class Particle {
 	/**
 	 * Deep copy this instance of {@link Particle}
 	 * 
+	 * @param reentrantLock
+	 * 
 	 * @return another instance of {@link Particle} with each fields within it
 	 *         being isomorph to the original instance
 	 */
-	public Particle deepCopy() {
+	public Particle deepCopy(ReentrantLock lock) {
 
 		Model mod = this.simulation.getModel().deepCopy();
 		Simulation sim = new Simulation(mod);
-		
+
 		Map<String, GammaDistribution> newGammaDistribs = new HashMap<String, GammaDistribution>();
-		
+
 		for (String thisgamma : this.gammaDistribs.keySet()) {
-			Double shape =  this.gammaDistribs.get(thisgamma).getShape();
+			Double shape = this.gammaDistribs.get(thisgamma).getShape();
 			Double scale = this.gammaDistribs.get(thisgamma).getScale();
-			newGammaDistribs.put(thisgamma, new GammaDistribution(shape, scale));			
+			newGammaDistribs
+					.put(thisgamma, new GammaDistribution(shape, scale));
 		}
-		
-		Particle copy= new Particle (sim);
+
+		Particle copy = new Particle(sim, lock);
 		copy.gammaDistribs = newGammaDistribs;
-		
-		
+
 		return copy;
 
 	}
@@ -86,7 +93,7 @@ public class Particle {
 	 * 
 	 * @param stats
 	 */
-	
+
 	public void gammaUpdateAndSample(SimulationStatistics stats) {
 
 		Model model = this.simulation.getModel();
@@ -128,10 +135,10 @@ public class Particle {
 			// gamma sample
 			double newTunable = thisGamma.sample();
 			this.simulation.getModel().setTunable(thisTunable, newTunable);
-			
-			
-			//Model needs to load updates Tunables into Variablespace used by evaluators
-			//model.updateTunableVariables();
+
+			// Model needs to load updates Tunables into Variablespace used by
+			// evaluators
+			// model.updateTunableVariables();
 		}
 
 	}
@@ -152,6 +159,50 @@ public class Particle {
 		gammaUpdateAndSample(stats);
 
 		return stats;
+	}
+
+	/**
+	 * Set the next simulation's run time. This method has to be called before
+	 * running the thread!
+	 * 
+	 * @param t
+	 */
+	public void setRunSimulationTime(double t) {
+
+		this.nextSimulationTime = t;
+	}
+
+	@Override
+	public void run() {
+
+		this.lock.lock();
+
+		try {
+			SimulationStatistics stat = runSimulation(this.nextSimulationTime);
+
+			if (Main.verbose) {
+				System.out.println("ExecutionNumber ProduceGata1 \t"
+						+ stat.getExecutedNum().get("ProduceGata1"));
+				System.out.println("ExecutionNumber ProducePu1 \t"
+						+ stat.getExecutedNum().get("ProducePu1"));
+				System.out.println("ExecutionNumber DegradeGata1 \t"
+						+ stat.getExecutedNum().get("DegradeGata1"));
+				System.out.println("ExecutionNumber DegradePu1 \t"
+						+ stat.getExecutedNum().get("DegradePu1"));
+
+				System.out.println("PropensitySum ProduceGata1 \t"
+						+ stat.getPropSum().get("ProduceGata1"));
+				System.out.println("PropensitySum ProducePu1 \t"
+						+ stat.getPropSum().get("ProducePu1"));
+				System.out.println("PropensitySum DegradeGata1 \t"
+						+ stat.getPropSum().get("DegradeGata1"));
+				System.out.println("PropensitySum DegradePu1 \t"
+						+ stat.getPropSum().get("DegradePu1"));
+			}
+		} finally {
+			this.lock.unlock();
+		}
+
 	}
 
 }
