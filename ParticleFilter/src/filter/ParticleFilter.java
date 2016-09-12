@@ -67,6 +67,7 @@ public class ParticleFilter {
 		Simulation sim = new Simulation(m);
 		
 		// ReentrantLocks initialization and assignment
+		this.threadNum = _threadNum;
 		this.lockList = new ArrayList<ReentrantLock>();
 		for (int i = 0; i < this.threadNum; i++) {
 			this.lockList.add(new ReentrantLock());
@@ -83,7 +84,7 @@ public class ParticleFilter {
 		}
 
 		this.particleNum = n;
-		this.threadNum = _threadNum;
+
 	}
 
 	/**
@@ -195,7 +196,7 @@ public class ParticleFilter {
 			// resulting in negative propensities .... resulting in no reaction
 			// being chosen ... resulting in an null pointer exception
 
-			//this.particleList = newParticleList;
+			this.particleList = newParticleList;
 			
 			
 

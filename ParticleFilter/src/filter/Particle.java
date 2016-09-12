@@ -111,14 +111,27 @@ public class Particle implements Runnable {
 
 			// gamma update
 			double newShape = shape;
-			double newScale = 1 / scale;
+			double newScale = 1 / scale; // newScale == rate
+			
+			double rp = 0;
+			double gp = 0;
+			
 			for (String reaction : reactions) {
-				newShape += stats.getExecutedNum().get(reaction);
-				newScale += stats.getPropSum().get(reaction);
+				rp += stats.getExecutedNum().get(reaction);
+				gp += stats.getPropSum().get(reaction);
+				
+				
 			}
+			
+			gp = gp / this.simulation.getModel().getTunable().get(thisTunable);
+					
+			newShape += rp;
+			newScale += gp;
 			newScale = 1 / newScale;
+			
 			thisGamma = new GammaDistribution(newShape, newScale);
 			this.gammaDistribs.put(thisTunable, thisGamma);
+			
 			if (Main.verbose) {
 				System.out.println(thisTunable + " \t oldshape: " + shape
 						+ "\t newshape: " + newShape + "\t oldscale: " + scale

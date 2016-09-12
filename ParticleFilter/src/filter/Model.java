@@ -242,7 +242,12 @@ public class Model {
 	 */
 
 	public void executeReaction(String name, Double time) {
+		
 		HashMap<String, Expression> changemap = this.reactionmap.get(name);
+		
+		if ((name == null) || (time == null) || (changemap == null)) {
+			System.out.println();
+		}
 		for (String key : changemap.keySet()) {
 			Double old = this.species.get(key);
 			Double change = time * changemap.get(key).evaluate();
