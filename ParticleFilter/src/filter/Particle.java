@@ -57,6 +57,17 @@ public class Particle implements Runnable {
 	}
 
 	/**
+	 * Return model of the particle. The {@link Model} is contained within the
+	 * {@link Simulation} of the particle
+	 * 
+	 * @return Model used in the particles Simulation
+	 */
+
+	public Model getModel() {
+		return (this.simulation.getModel());
+	}
+
+	/**
 	 * Deep copy this instance of {@link Particle}
 	 * 
 	 * @param reentrantLock
@@ -112,26 +123,25 @@ public class Particle implements Runnable {
 			// gamma update
 			double newShape = shape;
 			double newScale = 1 / scale; // newScale == rate
-			
+
 			double rp = 0;
 			double gp = 0;
-			
+
 			for (String reaction : reactions) {
 				rp += stats.getExecutedNum().get(reaction);
 				gp += stats.getPropSum().get(reaction);
-				
-				
+
 			}
-			
+
 			gp = gp / this.simulation.getModel().getTunable().get(thisTunable);
-					
+
 			newShape += rp;
 			newScale += gp;
 			newScale = 1 / newScale;
-			
+
 			thisGamma = new GammaDistribution(newShape, newScale);
 			this.gammaDistribs.put(thisTunable, thisGamma);
-			
+
 			if (Main.verbose) {
 				System.out.println(thisTunable + " \t oldshape: " + shape
 						+ "\t newshape: " + newShape + "\t oldscale: " + scale

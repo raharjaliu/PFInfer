@@ -31,8 +31,9 @@ public class ParticleFilter {
 	private int threadNum;
 	private int particleNum;
 	private BufferedReader dbr;
+	private Model baseModel;
 
-	private double deviation = 2.0;
+	private double deviation = 5.0;
 
 	/**
 	 * Initializes {@link ParticleFilter}
@@ -65,25 +66,27 @@ public class ParticleFilter {
 		Xmlparser generator = new Xmlparser();
 		Model m = generator.generatemodel(modelFile);
 		Simulation sim = new Simulation(m);
-		
+
 		// ReentrantLocks initialization and assignment
 		this.threadNum = _threadNum;
 		this.lockList = new ArrayList<ReentrantLock>();
 		for (int i = 0; i < this.threadNum; i++) {
 			this.lockList.add(new ReentrantLock());
 		}
-		
+
 		int counter = 0;
 		Particle particle = new Particle(sim, this.lockList.get(counter));
 
 		this.particleList = new ArrayList<>();
 		this.particleList.add(particle);
 		for (int i = 1; i < n; i++) {
-			counter += counter; 
-			this.particleList.add(particle.deepCopy(this.lockList.get(counter % this.lockList.size())));
+			counter += counter;
+			this.particleList.add(particle.deepCopy(this.lockList.get(counter
+					% this.lockList.size())));
 		}
 
 		this.particleNum = n;
+		this.baseModel = m.deepCopy();
 
 	}
 
@@ -92,7 +95,7 @@ public class ParticleFilter {
 	 */
 
 	public void run() throws IOException {
-		
+
 		this.dbr.readLine();
 
 		int dataPointCounter = 0;
@@ -119,20 +122,20 @@ public class ParticleFilter {
 
 				p.setRunSimulationTime(runTime);
 				new Thread(p).start();
-				
-//				SimulationStatistics stat = p.runSimulation(runTime);
+
+				// SimulationStatistics stat = p.runSimulation(runTime);
 
 			}
-			
-			// checks whether all locks are free (i.e. all particle filters were run)
+
+			// checks whether all locks are free (i.e. all particle filters were
+			// run)
 			for (ReentrantLock l : this.lockList) {
 				l.lock();
 			}
-			
+
 			for (ReentrantLock l : this.lockList) {
 				l.unlock();
 			}
-			
 
 			// Creating Map of SpeciesDistribution for the current timestep
 
@@ -148,8 +151,6 @@ public class ParticleFilter {
 			speciesDist.remove("time");
 
 			// Particle weighting
-			// TODO assert that order of particles in particleList and
-			// particleWeights are synchronized
 			ArrayList<Double> particleWeights = new ArrayList<>();
 
 			Double weightSum = 0.0;
@@ -169,16 +170,17 @@ public class ParticleFilter {
 			ArrayList<Particle> newParticleList = new ArrayList<>();
 
 			HashSet<Integer> trackChosen = new HashSet<Integer>();
-			
+
 			int counter = 0;
 
-			for (int i = 0; i < particleList.size(); i++) {
+			for (int i = 0; i < particleNum; i++) {
 				Double weigthCutoff = (Math.random()) * weightSum;
 				Double currentParticle = 0.0;
 				for (int j = 0; j < particleWeights.size(); j++) {
 					currentParticle += particleWeights.get(j);
 					if (weigthCutoff < currentParticle) {
-						ReentrantLock lock = this.lockList.get(counter % this.lockList.size());
+						ReentrantLock lock = this.lockList.get(counter
+								% this.lockList.size());
 						newParticleList.add(particleList.get(j).deepCopy(lock));
 						trackChosen.add(j);
 						break;
@@ -186,22 +188,36 @@ public class ParticleFilter {
 				}
 			}
 
+			// Report Particle Sampling Collapse ratio
+			
 			System.out.println("Collapsed " + particleList.size()
 					+ " particles onto " + trackChosen.size()
 					+ " chosen particles");
 
-			// THIS Works
-			// But eventually Kdg and Kdp get so big that they degrade more than
-			// is available resulting in negative concentration ...
-			// resulting in negative propensities .... resulting in no reaction
-			// being chosen ... resulting in an null pointer exception
-
 			this.particleList = newParticleList;
-			
-			
 
 		}
 
+		// Print tuned Particles
+		
+		for (int i = 0; i < particleNum; i++) {
+			Particle p = this.particleList.get(i);
+			Model simulated = p.getModel();
+			System.out.println("\nParticle: " + (i+1));
+			System.out.println("Species:");
+			for (String s : simulated.getSpecies().keySet()) {
+				System.out.println("\t" + s + "\t"
+						+ baseModel.getSpecies().get(s) + "\t->\t"
+						+ simulated.getSpecies().get(s));
+			}
+			System.out.println("Tunables:");
+			for (String s : simulated.getTunable().keySet()) {
+				System.out.println("\t" + s + "\t"
+						+ baseModel.getTunable().get(s) + "\t->\t"
+						+ simulated.getTunable().get(s));
+			}
+
+		}
 	}
 
 }

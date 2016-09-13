@@ -85,6 +85,10 @@ public class Model {
 		this.species.put(name, value);
 	}
 
+	public HashMap<String, Double> getSpecies() {
+		return this.species;
+	}
+	
 	/**
 	 * Set constant - value pair in this Models' constant HashMap
 	 * 
@@ -242,19 +246,18 @@ public class Model {
 	 */
 
 	public void executeReaction(String name, Double time) {
-		
+
 		HashMap<String, Expression> changemap = this.reactionmap.get(name);
-		
-		if ((name == null) || (time == null) || (changemap == null)) {
-			System.out.println();
-		}
+
 		for (String key : changemap.keySet()) {
 			Double old = this.species.get(key);
 			Double change = time * changemap.get(key).evaluate();
 			Double newValue = old + change;
+
 			if (newValue < 0) {
-				System.err.println("something is fishy!!! species " + key
-						+ "  below 0.0");
+				System.err.println("species " + key + "  negative value "
+						+ newValue + " replaced with 0.0");
+				newValue = 0.0;
 			}
 
 			this.species.put(key, newValue);
@@ -268,7 +271,7 @@ public class Model {
 	/**
 	 * Return the value of a propensity expression of a given reaction contained
 	 * in this models' propensity HashMap. The propensity value is calculated
-	 * via its Epression Object in the propensitymap HashMap
+	 * via its Expression Object in the propensitymap HashMap
 	 * 
 	 * @param reactioname
 	 * @return propensity calculated from it's propensity expression given the
@@ -397,7 +400,7 @@ public class Model {
 	 * propensity HashMap of a freshly generated instance of {@link Model} with
 	 * a copy of the propensity HashMap form the instance it is copied from*
 	 */
-	
+
 	private void overwritePropensity(HashMap<String, String> copy) {
 		this.propensity = copy;
 	}

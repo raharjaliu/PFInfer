@@ -21,7 +21,7 @@ public class Simulation {
 	 *            an instance of {@link Model} that is associated with this
 	 *            Simulation
 	 */
-	
+
 	public Simulation(Model m) {
 		this.model = m;
 	}
@@ -71,7 +71,11 @@ public class Simulation {
 			counter++;
 		}
 
-		System.out.println("Starting simulation. Remaining time: " + runTime);
+		if (Main.verbose) {
+			System.out.println("Starting simulation. Remaining time: "
+					+ runTime);
+		}
+
 		int runCount = 0;
 
 		while (timestep < runTime) {
@@ -80,6 +84,8 @@ public class Simulation {
 			for (int i = 0; i < reactionumber; i++) {
 				combinedPropensities += propensity[i];
 			}
+
+			// System.out.println(combinedPropensities);
 
 			Double rand1 = Math.random();
 			Double rand2 = Math.random();
@@ -113,12 +119,13 @@ public class Simulation {
 
 			timestep += step;
 
-			if (++runCount % 100000 == 0) {
-				System.out.println("Run count: " + runCount
-						+ ". Time remaining: " + (runTime - timestep));
+			if (Main.verbose) {
+				if (++runCount % 100000 == 0) {
+					System.out.println("Run count: " + runCount
+							+ ". Time remaining: " + (runTime - timestep));
+				}
 			}
 		}
-
 		return statistics;
 	}
 }
