@@ -105,7 +105,7 @@ public class Particle implements Runnable {
 	 * @param stats
 	 */
 
-	public void gammaUpdateAndSample(SimulationStatistics stats) {
+	private void gammaUpdate(SimulationStatistics stats) {
 
 		Model model = this.simulation.getModel();
 		HashMap<String, Double> tunable = model.getTunable();
@@ -149,21 +149,37 @@ public class Particle implements Runnable {
 						+ (shape * scale) + "\t newmean: "
 						+ (newShape * newScale));
 			}
-			// double newShape = shape +
-			// stats.getExecutedNum().get(model.thisTunable));
-			// double newScale = 1/((1/scale) +
-			// stats.getPropSum().get(model.thisTunable)); // rate := 1 /
-			// scale!!
+		}
+	}
+
+	/**
+	 * Assign new tunable values using underlying Gamma distribution associated
+	 * with each tunable
+	 */
+	private void gammaSample() {
+
+		Model model = this.simulation.getModel();
+		HashMap<String, Double> tunables = model.getTunable();
+
+		for (String thisTunable : tunables.keySet()) {
+
+			GammaDistribution thisGamma = this.gammaDistribs.get(thisTunable);
 
 			// gamma sample
 			double newTunable = thisGamma.sample();
 			this.simulation.getModel().setTunable(thisTunable, newTunable);
-
-			// Model needs to load updates Tunables into Variablespace used by
-			// evaluators
-			// model.updateTunableVariables();
 		}
+	}
 
+	/**
+	 * Set the next simulation's run time. This method has to be called before
+	 * running the thread!
+	 * 
+	 * @param t
+	 */
+	public void setRunSimulationTime(double t) {
+
+		this.nextSimulationTime = t;
 	}
 
 	/**
@@ -178,21 +194,11 @@ public class Particle implements Runnable {
 	 */
 	public SimulationStatistics runSimulation(double t) {
 
+		gammaSample();
 		SimulationStatistics stats = this.simulation.runSimulation(t);
-		gammaUpdateAndSample(stats);
+		gammaUpdate(stats);
 
 		return stats;
-	}
-
-	/**
-	 * Set the next simulation's run time. This method has to be called before
-	 * running the thread!
-	 * 
-	 * @param t
-	 */
-	public void setRunSimulationTime(double t) {
-
-		this.nextSimulationTime = t;
 	}
 
 	@Override
