@@ -106,8 +106,6 @@ public class ParticleFilter {
 
 		while ((line = this.dbr.readLine()) != null) {
 
-			// TODO fetch next value
-
 			int particleCounter = 0;
 			System.out.println("Data point #" + ++dataPointCounter);
 
@@ -194,11 +192,17 @@ public class ParticleFilter {
 					+ " particles onto " + trackChosen.size()
 					+ " chosen particles");
 
+			// Update ParticleList with newly sampled list
 			this.particleList = newParticleList;
 
 		}
 
 		// Print tuned Particles
+		
+		printParticles();
+	}
+	
+	private void printParticles(){
 		
 		for (int i = 0; i < particleNum; i++) {
 			Particle p = this.particleList.get(i);
@@ -218,6 +222,7 @@ public class ParticleFilter {
 			}
 
 		}
+		
 	}
 
 }
