@@ -22,6 +22,8 @@ import org.apache.commons.math3.distribution.NormalDistribution;
  */
 
 public class ParticleFilter {
+	
+	private static final String DEFAULT_CELL_ID = "DEFAULT_CELL_ID";
 
 	public static double RUN_TIME = 100000;
 
@@ -76,6 +78,7 @@ public class ParticleFilter {
 
 		int counter = 0;
 		Particle particle = new Particle(sim, this.lockList.get(counter));
+		particle.getModel().setCellID(ParticleFilter.DEFAULT_CELL_ID);
 
 		this.particleList = new ArrayList<>();
 		this.particleList.add(particle);
@@ -118,6 +121,7 @@ public class ParticleFilter {
 
 				System.out.println("Running partile #" + ++particleCounter);
 
+				p.getModel().setCellID(ParticleFilter.DEFAULT_CELL_ID);
 				p.setRunSimulationTime(runTime);
 				new Thread(p).start();
 

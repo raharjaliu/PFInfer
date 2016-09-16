@@ -18,6 +18,8 @@ import parsii.tokenizer.ParseException;
  * @author Rene Schoeffel
  */
 public class Model {
+	
+	private String cellID = "";
 
 	private HashMap<String, Double> species = new HashMap<String, Double>();
 	private HashMap<String, Double> constant = new HashMap<String, Double>();
@@ -351,6 +353,8 @@ public class Model {
 		outmodel.updateSpeciesVariables();
 		outmodel.updateConstantVariables();
 		outmodel.updateTunableVariables();
+		
+		outmodel.setCellID(this.cellID);
 
 		return outmodel;
 	}
@@ -415,6 +419,23 @@ public class Model {
 	private void overwriteDependency(
 			HashMap<String, HashMap<String, String>> copy) {
 		this.dependencymap = copy;
+	}
+	
+	/**
+	 * Setter method for {@link #cellID}
+	 * 
+	 * @param _cellID new cell ID to be assigned
+	 */
+	public void setCellID(String _cellID) {
+		this.cellID = _cellID;
+	}
+	
+	/**
+	 * Getter method for {@link #cellID}
+	 * @return
+	 */
+	public String getCellID() {
+		return this.cellID;
 	}
 
 }
