@@ -79,6 +79,7 @@ public class Main {
 					argumentline.getOptionValue('d'),
 					Integer.parseInt(argumentline.getOptionValue('p')),
 					Integer.parseInt(argumentline.getOptionValue('c')));
+			
 			pf.run();
 		} catch (IOException e) {
 			e.printStackTrace();

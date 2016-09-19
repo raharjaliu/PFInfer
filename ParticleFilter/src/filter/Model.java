@@ -18,7 +18,7 @@ import parsii.tokenizer.ParseException;
  * @author Rene Schoeffel
  */
 public class Model {
-	
+
 	private String cellID = "";
 
 	private HashMap<String, Double> species = new HashMap<String, Double>();
@@ -90,7 +90,7 @@ public class Model {
 	public HashMap<String, Double> getSpecies() {
 		return this.species;
 	}
-	
+
 	/**
 	 * Set constant - value pair in this Models' constant HashMap
 	 * 
@@ -257,8 +257,10 @@ public class Model {
 			Double newValue = old + change;
 
 			if (newValue < 0) {
-				System.err.println("species " + key + "  negative value "
-						+ newValue + " replaced with 0.0");
+				if (Main.verbose) {
+					System.out.println("species " + key + "  negative value "
+							+ newValue + " replaced with 0.0");
+				}
 				newValue = 0.0;
 			}
 
@@ -353,7 +355,7 @@ public class Model {
 		outmodel.updateSpeciesVariables();
 		outmodel.updateConstantVariables();
 		outmodel.updateTunableVariables();
-		
+
 		outmodel.setCellID(this.cellID);
 
 		return outmodel;
@@ -420,18 +422,20 @@ public class Model {
 			HashMap<String, HashMap<String, String>> copy) {
 		this.dependencymap = copy;
 	}
-	
+
 	/**
 	 * Setter method for {@link #cellID}
 	 * 
-	 * @param _cellID new cell ID to be assigned
+	 * @param _cellID
+	 *            new cell ID to be assigned
 	 */
 	public void setCellID(String _cellID) {
 		this.cellID = _cellID;
 	}
-	
+
 	/**
 	 * Getter method for {@link #cellID}
+	 * 
 	 * @return
 	 */
 	public String getCellID() {

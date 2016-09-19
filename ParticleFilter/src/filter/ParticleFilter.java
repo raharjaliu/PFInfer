@@ -1,12 +1,11 @@
 package filter;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Queue;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
@@ -22,18 +21,18 @@ import org.apache.commons.math3.distribution.NormalDistribution;
  */
 
 public class ParticleFilter {
-	
+
 	private static final String DEFAULT_CELL_ID = "DEFAULT_CELL_ID";
 
 	public static double RUN_TIME = 100000;
 
 	private ArrayList<Particle> particleList;
 	private ArrayList<ReentrantLock> lockList;
-	private HashMap<String, Integer> nameToColnumMap;
 	private int threadNum;
 	private int particleNum;
-	private BufferedReader dbr;
 	private Model baseModel;
+
+	private HashMap<String, HashMap<String, HashMap<String, ArrayList<Double>>>> dataTrees;
 
 	private double deviation = 5.0;
 
@@ -54,16 +53,12 @@ public class ParticleFilter {
 	public ParticleFilter(String model, String data, int n, int _threadNum)
 			throws IOException {
 
+		// parse and store time series data trees
 		File dataFile = new File(data);
-		this.dbr = new BufferedReader(new FileReader(dataFile));
+		Dataparser dataparser = new Dataparser();
+		this.dataTrees = dataparser.generateDataTrees(dataFile);
 
-		String line = this.dbr.readLine();
-		String[] cols = line.split("\t");
-		this.nameToColnumMap = new HashMap<>();
-		for (int i = 0; i < cols.length; i++) {
-			this.nameToColnumMap.put(cols[i], i);
-		}
-
+		// generate basemodel
 		File modelFile = new File(model);
 		Xmlparser generator = new Xmlparser();
 		Model m = generator.generatemodel(modelFile);
@@ -93,125 +88,200 @@ public class ParticleFilter {
 
 	}
 
-	/**
-	 * Perform the ParticleFilter Algorithm for instance of @ ParticleFilter}
-	 */
-
 	public void run() throws IOException {
 
-		this.dbr.readLine();
+		// iterate over data trees
+		for (String treeID : this.dataTrees.keySet()) {
 
-		int dataPointCounter = 0;
-		double last = Double
-				.parseDouble(this.dbr.readLine().split("\t")[nameToColnumMap
-						.get("time")]);
-		String line;
+			HashMap<String, HashMap<String, ArrayList<Double>>> tree = this.dataTrees
+					.get(treeID);
 
-		while ((line = this.dbr.readLine()) != null) {
+			// skip trees that contain little Data
+			if (tree.size() <= 10) {
+				System.out.println("Skipping Tree: " + treeID + "\t Size: "
+						+ tree.size());
+			} else {
 
-			int particleCounter = 0;
-			System.out.println("Data point #" + ++dataPointCounter);
+				// build Queue from data
+				QueueBuilder builder = new QueueBuilder(tree.keySet());
+				Queue<String> cellorder = builder.getQueue();
+				HashSet<String> leaves = builder.getLeaves();
+				HashSet<String> branches = builder.getBranches();
 
-			double current = Double
-					.parseDouble(line.split("\t")[nameToColnumMap.get("time")]);
-			double runTime = current - last;
-			last = current;
+				System.out.println("Running Tree: " + treeID + "\t Size: "
+						+ tree.size() + "\t Branches: " + branches.size()
+						+ "\t Leaves: " + leaves.size());
 
-			for (Particle p : this.particleList) {
+				// Create new particleListMap for this tree
+				HashMap<String, ArrayList<Particle>> particleListMap = new HashMap<String, ArrayList<Particle>>();
+				ArrayList<Particle> currentParticles = deepCopyParticleList(
+						this.particleList, "0");
+				particleListMap.put("0", currentParticles);
 
-				System.out.println("Running partile #" + ++particleCounter);
+				// iterate over cellQueue
+				while (cellorder.isEmpty() != true) {
 
-				p.getModel().setCellID(ParticleFilter.DEFAULT_CELL_ID);
-				p.setRunSimulationTime(runTime);
-				new Thread(p).start();
+					String currentCell = cellorder.poll();
+					String parent = builder.getParent(currentCell);
+					ArrayList<Particle> currentList = deepCopyParticleList(
+							particleListMap.get(parent), currentCell);
 
-				// SimulationStatistics stat = p.runSimulation(runTime);
+					// get Branch Data
+					HashMap<String, ArrayList<Double>> currentCellData = tree
+							.get(currentCell);
+					Double lastTime = currentCellData.get("time").get(0);
 
-			}
+					// Iterate over Branch Data
+					for (int i = 1; i < currentCellData.get("time").size(); i++) {
+						System.out.println("Running Tree " + treeID + " Cell "
+								+ currentCell + " ("
+								+ (tree.size() - cellorder.size()) + "/"
+								+ tree.size() + ") " + "Datapoint " + i + "/"
+								+ (currentCellData.get("time").size() - 1));
+						Double currentTime = currentCellData.get("time").get(i);
+						Double runTime = currentTime - lastTime;
+						lastTime = currentTime;
 
-			// checks whether all locks are free (i.e. all particle filters were
-			// run)
-			for (ReentrantLock l : this.lockList) {
-				l.lock();
-			}
+						// start Particle Threads
+						int particleCounter = 0;
+						for (Particle p : currentList) {
+							if (Main.verbose) {
+								System.out.println("Running partile #"
+										+ ++particleCounter);
+							}
+							p.setRunSimulationTime(runTime);
+							new Thread(p).start();
+						}
 
-			for (ReentrantLock l : this.lockList) {
-				l.unlock();
-			}
+						// checks whether all locks are free (i.e. all particle
+						// filters were run)
+						for (ReentrantLock l : this.lockList) {
+							l.lock();
+						}
+						for (ReentrantLock l : this.lockList) {
+							l.unlock();
+						}
 
-			// Creating Map of SpeciesDistribution for the current timestep
+						// Creating Map of SpeciesDistribution for the current
+						// timestep
+						HashMap<String, NormalDistribution> speciesDist = new HashMap<String, NormalDistribution>();
 
-			HashMap<String, NormalDistribution> speciesDist = new HashMap<String, NormalDistribution>();
-			String[] cols = line.split("\t");
-			for (String colname : this.nameToColnumMap.keySet()) {
-				Double mean = Double.parseDouble(cols[nameToColnumMap
-						.get(colname)]);
-				NormalDistribution temp = new NormalDistribution(mean,
-						deviation);
-				speciesDist.put(colname, temp);
-			}
-			speciesDist.remove("time");
+						for (String species : this.baseModel.getSpecies()
+								.keySet()) {
+							Double mean = currentCellData.get(species).get(i);
+							NormalDistribution temp = new NormalDistribution(
+									mean, deviation);
+							speciesDist.put(species, temp);
+						}
+						// weight Particles
+						ArrayList<Double> particleWeights = weightParticles(
+								currentList, speciesDist);
 
-			// Particle weighting
-			ArrayList<Double> particleWeights = new ArrayList<>();
+						// sample Particles
+						ArrayList<Particle> newParticleList = sampleParticles(
+								currentList, particleWeights);
 
-			Double weightSum = 0.0;
+						// Update ParticleList with newly sampled list
+						currentList = newParticleList;
 
-			for (Particle p : this.particleList) {
-				Double combinedweight = 0.0;
-				for (String species : speciesDist.keySet()) {
-					combinedweight += speciesDist.get(species).density(
-							p.getConcentration(species));
-				}
-				weightSum += combinedweight;
-				particleWeights.add(combinedweight);
-			}
-
-			// Sample Particles based on particleWeights
-
-			ArrayList<Particle> newParticleList = new ArrayList<>();
-
-			HashSet<Integer> trackChosen = new HashSet<Integer>();
-
-			int counter = 0;
-
-			for (int i = 0; i < particleNum; i++) {
-				Double weigthCutoff = (Math.random()) * weightSum;
-				Double currentParticle = 0.0;
-				for (int j = 0; j < particleWeights.size(); j++) {
-					currentParticle += particleWeights.get(j);
-					if (weigthCutoff < currentParticle) {
-						ReentrantLock lock = this.lockList.get(counter
-								% this.lockList.size());
-						newParticleList.add(particleList.get(j).deepCopy(lock));
-						trackChosen.add(j);
-						break;
 					}
+
+					// Update particleListMap with finished cell simulation
+					particleListMap.put(currentCell, currentList);
+
 				}
+				
+				for (String leaf : leaves){
+					System.out.println("Tree " + treeID + " Cell " + leaf);
+					printParticles(particleListMap.get(leaf));
+				}
+				
 			}
+		}
+	}
 
-			// Report Particle Sampling Collapse ratio
-			
-			System.out.println("Collapsed " + particleList.size()
-					+ " particles onto " + trackChosen.size()
-					+ " chosen particles");
+	private ArrayList<Particle> deepCopyParticleList(
+			ArrayList<Particle> _particleList, String cellID) {
 
-			// Update ParticleList with newly sampled list
-			this.particleList = newParticleList;
+		ArrayList<Particle> newList = new ArrayList<Particle>();
 
+		for (int i = 0; i < this.particleNum; i++) {
+			Particle newparticle = _particleList.get(i).deepCopy(
+					this.lockList.get(i % this.lockList.size()));
+			newparticle.getModel().setCellID(cellID);
+			newList.add(newparticle);
 		}
 
-		// Print tuned Particles
-		
-		printParticles();
+		return (newList);
+
 	}
-	
-	private void printParticles(){
-		
+
+	private ArrayList<Double> weightParticles(
+			ArrayList<Particle> _particleList,
+			HashMap<String, NormalDistribution> _speciesDist) {
+
+		ArrayList<Double> _particleWeights = new ArrayList<>();
+
+		for (Particle p : _particleList) {
+			Double combinedweight = 0.0;
+			for (String species : _speciesDist.keySet()) {
+				combinedweight += _speciesDist.get(species).density(
+						p.getConcentration(species));
+			}
+			_particleWeights.add(combinedweight);
+		}
+
+		return (_particleWeights);
+	}
+
+	private ArrayList<Particle> sampleParticles(
+			ArrayList<Particle> _particleList,
+			ArrayList<Double> _particleWeights) {
+
+		ArrayList<Particle> newParticleList = new ArrayList<>();
+
+		HashSet<Integer> trackChosen = new HashSet<Integer>();
+
+		Double weightSum = 0.0;
+
 		for (int i = 0; i < particleNum; i++) {
-			Particle p = this.particleList.get(i);
+
+			weightSum += _particleWeights.get(i);
+		}
+
+		int counter = 0;
+
+		for (int i = 0; i < particleNum; i++) {
+			Double weigthCutoff = (Math.random()) * weightSum;
+			Double currentParticle = 0.0;
+			for (int j = 0; j < _particleWeights.size(); j++) {
+				currentParticle += _particleWeights.get(j);
+				if (weigthCutoff < currentParticle) {
+					ReentrantLock lock = this.lockList.get(counter
+							% this.lockList.size());
+					newParticleList.add(_particleList.get(j).deepCopy(lock));
+					trackChosen.add(j);
+					break;
+				}
+			}
+		}
+
+		// Report Particle Sampling Collapse ratio
+
+		System.out
+				.println("Collapsed " + _particleList.size()
+						+ " particles onto " + trackChosen.size()
+						+ " chosen particles");
+
+		return (newParticleList);
+	}
+
+	private void printParticles(ArrayList<Particle> _particleList) {
+
+		for (int i = 0; i < particleNum; i++) {
+			Particle p = _particleList.get(i);
 			Model simulated = p.getModel();
-			System.out.println("\nParticle: " + (i+1));
+			System.out.println("\nParticle: " + (i + 1));
 			System.out.println("Species:");
 			for (String s : simulated.getSpecies().keySet()) {
 				System.out.println("\t" + s + "\t"
@@ -226,7 +296,7 @@ public class ParticleFilter {
 			}
 
 		}
-		
+
 	}
 
 }
