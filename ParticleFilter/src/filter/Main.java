@@ -1,8 +1,11 @@
 package filter;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -16,6 +19,7 @@ import org.apache.commons.cli.ParseException;
 public class Main {
 	
 	public static boolean verbose = false;
+	public static PrintWriter outfile;
 
 	public static void main(String[] args) {
 
@@ -27,17 +31,22 @@ public class Main {
 				.longOpt("Particles").desc("Number of particles").build();
 		Option option4 = Option.builder("c").required(true).hasArg(true)
 				.longOpt("Cores").desc("Number of threads").build();
+		
 
 		Option option5 = Option.builder("s").required(false).hasArg(false)
 				.longOpt("Silent").desc("Silences Sys.out Stream").build();
 		Option option6 = Option.builder("v").required(false).hasArg(false)
 				.longOpt("Verbose").desc("Expands Sys.out Stream").build();
 
+		Option option7 = Option.builder("o").required(false).hasArg(true)
+				.longOpt("Outfile").desc("Output file").build();
+		
 		Options options = new Options();
 		options.addOption(option1);
 		options.addOption(option2);
 		options.addOption(option3);
 		options.addOption(option4);
+		options.addOption(option7);
 
 		OptionGroup exclusiveOutSreamSettings = new OptionGroup();
 		exclusiveOutSreamSettings.addOption(option5);
@@ -73,6 +82,16 @@ public class Main {
 			Main.verbose = true;
 		}
 		
+		if (argumentline.hasOption('o')) {
+			try {
+				Main.outfile = new PrintWriter(argumentline.getOptionValue('o'), "UTF-8");
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+		}
+		
 		try {
 			ParticleFilter pf = new ParticleFilter(
 					argumentline.getOptionValue('m'),
@@ -84,6 +103,8 @@ public class Main {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		System.out.println("done");
 
 	}
 }

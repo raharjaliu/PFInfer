@@ -47,8 +47,8 @@ public class Dataparser {
 			HashMap<String, ArrayList<Double>> currentCell = treeMap
 					.get(treeID).get(cellNr);
 			currentCell.get("time").add(Double.parseDouble(cols[nameToColnumMap.get("absoluteTime")]));
-			currentCell.get("Gata1").add((Double.parseDouble(cols[nameToColnumMap.get("auto_w01")]))/(Double.parseDouble(cols[nameToColnumMap.get("auto_w01_area")])));
-			currentCell.get("Pu1").add((Double.parseDouble(cols[nameToColnumMap.get("auto_w02")]))/(Double.parseDouble(cols[nameToColnumMap.get("auto_w02_area")])));
+			currentCell.get("Gata1").add((Double.parseDouble(cols[nameToColnumMap.get("auto_w02")]))/(Double.parseDouble(cols[nameToColnumMap.get("auto_w02_area")])));
+			currentCell.get("Pu1").add((Double.parseDouble(cols[nameToColnumMap.get("auto_w01")]))/(Double.parseDouble(cols[nameToColnumMap.get("auto_w01_area")])));
 		}
 		dbr.close();
 

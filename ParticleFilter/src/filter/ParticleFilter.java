@@ -1,7 +1,14 @@
 package filter;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -97,7 +104,7 @@ public class ParticleFilter {
 					.get(treeID);
 
 			// skip trees that contain little Data
-			if (tree.size() <= 10) {
+			if (tree.size() <= 1) {
 				System.out.println("Skipping Tree: " + treeID + "\t Size: "
 						+ tree.size());
 			} else {
@@ -191,11 +198,23 @@ public class ParticleFilter {
 
 				}
 				
-				for (String leaf : leaves){
-					System.out.println("Tree " + treeID + " Cell " + leaf);
-					printParticles(particleListMap.get(leaf));
+				if (Main.outfile != null) {
+					System.out.println("Writing Output to: " + Main.outfile.toString());
 				}
-				
+
+				for (String leaf : leaves) {
+					if (Main.outfile != null) {
+						Main.outfile.write("Tree " + treeID + " Cell " + leaf +"\n");
+					} else {
+						System.out.println("Tree " + treeID + " Cell " + leaf);
+					}
+					// printParticles(particleListMap.get(leaf));
+					printParticlesTublar(particleListMap.get(leaf));
+				}
+
+				if (Main.outfile != null) {
+					Main.outfile.close();
+				}
 			}
 		}
 	}
@@ -274,6 +293,34 @@ public class ParticleFilter {
 						+ " chosen particles");
 
 		return (newParticleList);
+	}
+
+	private void printParticlesTublar(ArrayList<Particle> _particleList) {
+
+		String line = "Particle";
+		for (String s : baseModel.getTunable().keySet()) {
+			line = line + "\t" + s;
+		}
+
+		if (Main.outfile != null) {
+			Main.outfile.write(line + "\n");
+		} else {
+			System.out.println(line);
+		}
+
+		for (int i = 0; i < particleNum; i++) {
+			Particle p = _particleList.get(i);
+			Model simulated = p.getModel();
+			line = Integer.toString(i);
+			for (String s : baseModel.getTunable().keySet()) {
+				line = line + "\t" + simulated.getTunable().get(s);
+			}
+			if (Main.outfile != null) {
+				Main.outfile.write(line + "\n");
+			} else {
+				System.out.println(line);
+			}
+		}
 	}
 
 	private void printParticles(ArrayList<Particle> _particleList) {
