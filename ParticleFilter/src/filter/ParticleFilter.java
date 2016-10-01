@@ -1,14 +1,7 @@
 package filter;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,7 +34,7 @@ public class ParticleFilter {
 
 	private HashMap<String, HashMap<String, HashMap<String, ArrayList<Double>>>> dataTrees;
 
-	private double deviation = 5.0;
+	private double deviation = 0.01;
 
 	/**
 	 * Initializes {@link ParticleFilter}
@@ -103,8 +96,16 @@ public class ParticleFilter {
 			HashMap<String, HashMap<String, ArrayList<Double>>> tree = this.dataTrees
 					.get(treeID);
 
+			if (Main.outfile != null) {
+				String header = "Tree\tCell\tParticle";
+				for (String s : baseModel.getTunable().keySet()) {
+					header = header + "\t" + s;
+				}
+				Main.outfile.write(header + "\n");
+			}
+
 			// skip trees that contain little Data
-			if (tree.size() <= 1) {
+			if (tree.size() <= 10) {
 				System.out.println("Skipping Tree: " + treeID + "\t Size: "
 						+ tree.size());
 			} else {
@@ -197,23 +198,27 @@ public class ParticleFilter {
 					particleListMap.put(currentCell, currentList);
 
 				}
-				
+
 				if (Main.outfile != null) {
-					System.out.println("Writing Output to: " + Main.outfile.toString());
+					System.out.println("Writing Output to: "
+							+ Main.outfile.toString());
 				}
 
 				for (String leaf : leaves) {
-					if (Main.outfile != null) {
-						Main.outfile.write("Tree " + treeID + " Cell " + leaf +"\n");
-					} else {
+					if (Main.outfile == null) {
 						System.out.println("Tree " + treeID + " Cell " + leaf);
 					}
 					// printParticles(particleListMap.get(leaf));
-					printParticlesTublar(particleListMap.get(leaf));
+					printParticlesTublar(particleListMap.get(leaf), treeID,
+							leaf);
 				}
 
 				if (Main.outfile != null) {
 					Main.outfile.close();
+				}
+
+				for (String leaf : leaves) {
+					printParticles(particleListMap.get(leaf));
 				}
 			}
 		}
@@ -295,23 +300,22 @@ public class ParticleFilter {
 		return (newParticleList);
 	}
 
-	private void printParticlesTublar(ArrayList<Particle> _particleList) {
+	private void printParticlesTublar(ArrayList<Particle> _particleList,
+			String _treeID, String _cellID) {
 
-		String line = "Particle";
+		String line = "Tree\tCell\tParticle";
 		for (String s : baseModel.getTunable().keySet()) {
 			line = line + "\t" + s;
 		}
 
-		if (Main.outfile != null) {
-			Main.outfile.write(line + "\n");
-		} else {
+		if (Main.outfile == null) {
 			System.out.println(line);
 		}
 
 		for (int i = 0; i < particleNum; i++) {
 			Particle p = _particleList.get(i);
 			Model simulated = p.getModel();
-			line = Integer.toString(i);
+			line = _treeID + "\t" + _cellID + "\t" + Integer.toString(i);
 			for (String s : baseModel.getTunable().keySet()) {
 				line = line + "\t" + simulated.getTunable().get(s);
 			}
