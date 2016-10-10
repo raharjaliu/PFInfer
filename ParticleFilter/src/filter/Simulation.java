@@ -12,6 +12,8 @@ import java.util.HashMap;
 
 public class Simulation {
 
+	private double timeprox = 1.0;
+	
 	private Model model;
 
 	/**
@@ -62,11 +64,15 @@ public class Simulation {
 		HashMap<String, Integer> propMap = new HashMap<String, Integer>();
 		HashMap<String, HashMap<String, String>> dependency = this.model
 				.getDepencyMap();
+		
+		statistics.setPositionmap(propMap);
+		statistics.setPropArray(propensity);
 
 		int counter = 0;
 		for (String name : this.model.getPropensities().keySet()) {
 			reaction[counter] = name;
 			propensity[counter] = this.model.getPropensity(name);
+			
 			propMap.put(name, counter);
 			counter++;
 		}
@@ -90,7 +96,7 @@ public class Simulation {
 			Double rand1 = Math.random();
 			Double rand2 = Math.random();
 
-			Double step = -((1.0 / combinedPropensities) * Math.log(rand1));
+			Double step = -((timeprox / combinedPropensities) * Math.log(rand1));
 			Double propCutoff = rand2 * combinedPropensities;
 
 			String chosenReaction = "";

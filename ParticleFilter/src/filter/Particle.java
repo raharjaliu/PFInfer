@@ -21,6 +21,8 @@ public class Particle implements Runnable {
 	private Map<String, GammaDistribution> gammaDistribs;
 	private double nextSimulationTime;
 	private ReentrantLock lock;
+	
+	private double trajectoryWeight;
 
 	/**
 	 * Initializes {@link Particle}
@@ -37,13 +39,33 @@ public class Particle implements Runnable {
 
 		HashMap<String, Double> tunables = _simulation.getModel().getTunable();
 		for (String tunable : tunables.keySet()) {
+			double startvalue = tunables.get(tunable);
 			double shape = 1;
-			double scale = tunables.get(tunable);
+			double scale = 1;
+			if (startvalue > 1){
+				shape = startvalue;
+			}else{
+				scale = startvalue;
+			}
 			this.gammaDistribs
 					.put(tunable, new GammaDistribution(shape, scale));
 		}
+		
+		this.trajectoryWeight = 1.0;
 	}
 
+	public void setTrajectoryWeight(double in){
+		this.trajectoryWeight = in;
+	}
+	
+	public double getTrajectoryWeight(){
+		return(this.trajectoryWeight);
+	}
+	
+	public void updateWeight(double weight){
+		this.trajectoryWeight = this.trajectoryWeight * weight;
+	}
+	
 	/**
 	 * Return concentration of a given species. The concentration is contained
 	 * within the {@link Model} field that is contained within this class'
@@ -92,6 +114,8 @@ public class Particle implements Runnable {
 		Particle copy = new Particle(sim, lock);
 		copy.gammaDistribs = newGammaDistribs;
 
+		copy.setTrajectoryWeight(new Double(this.trajectoryWeight));
+		
 		return copy;
 
 	}
@@ -113,7 +137,7 @@ public class Particle implements Runnable {
 				.getTunableReactionMap();
 
 		for (String thisTunable : tunable.keySet()) {
-
+			
 			GammaDistribution thisGamma = this.gammaDistribs.get(thisTunable);
 			double shape = thisGamma.getShape();
 			double scale = thisGamma.getScale();

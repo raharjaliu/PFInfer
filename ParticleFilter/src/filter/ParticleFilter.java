@@ -12,6 +12,7 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 
 /**
  * 
+ * 
  * Class used to perform the ParticleFilter Algorithm as described by Feigelmann
  * Justin (2011). "Stochastic and deterministic methods for the analysis of
  * Nanog dynamics in mouse embryonic stem cells" PhD thesis.
@@ -22,6 +23,8 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 
 public class ParticleFilter {
 
+	private double deviation = 7.0;
+	
 	private static final String DEFAULT_CELL_ID = "DEFAULT_CELL_ID";
 
 	public static double RUN_TIME = 100000;
@@ -33,8 +36,6 @@ public class ParticleFilter {
 	private Model baseModel;
 
 	private HashMap<String, HashMap<String, HashMap<String, ArrayList<Double>>>> dataTrees;
-
-	private double deviation = 0.01;
 
 	/**
 	 * Initializes {@link ParticleFilter}
@@ -91,21 +92,25 @@ public class ParticleFilter {
 	public void run() throws IOException {
 
 		// iterate over data trees
+		boolean first = true;
+		
 		for (String treeID : this.dataTrees.keySet()) {
 
 			HashMap<String, HashMap<String, ArrayList<Double>>> tree = this.dataTrees
 					.get(treeID);
 
-			if (Main.outfile != null) {
+			if (Main.outfile != null && first) {
 				String header = "Tree\tCell\tParticle";
 				for (String s : baseModel.getTunable().keySet()) {
 					header = header + "\t" + s;
 				}
+				header = header + "\tWeight";
 				Main.outfile.write(header + "\n");
+				first = false;
 			}
 
 			// skip trees that contain little Data
-			if (tree.size() <= 10) {
+			if (tree.size() <= 0) {
 				System.out.println("Skipping Tree: " + treeID + "\t Size: "
 						+ tree.size());
 			} else {
@@ -213,14 +218,16 @@ public class ParticleFilter {
 							leaf);
 				}
 
-				if (Main.outfile != null) {
-					Main.outfile.close();
-				}
-
 				for (String leaf : leaves) {
 					printParticles(particleListMap.get(leaf));
 				}
 			}
+			
+			
+		}
+		
+		if (Main.outfile != null) {
+			Main.outfile.close();
 		}
 	}
 
@@ -247,12 +254,13 @@ public class ParticleFilter {
 		ArrayList<Double> _particleWeights = new ArrayList<>();
 
 		for (Particle p : _particleList) {
-			Double combinedweight = 0.0;
+			Double combinedweight = 1.0;
 			for (String species : _speciesDist.keySet()) {
-				combinedweight += _speciesDist.get(species).density(
+				combinedweight = combinedweight * _speciesDist.get(species).density(
 						p.getConcentration(species));
 			}
 			_particleWeights.add(combinedweight);
+			p.updateWeight(combinedweight);
 		}
 
 		return (_particleWeights);
@@ -272,7 +280,7 @@ public class ParticleFilter {
 
 			weightSum += _particleWeights.get(i);
 		}
-
+		
 		int counter = 0;
 
 		for (int i = 0; i < particleNum; i++) {
@@ -319,6 +327,7 @@ public class ParticleFilter {
 			for (String s : baseModel.getTunable().keySet()) {
 				line = line + "\t" + simulated.getTunable().get(s);
 			}
+			line = line + "\t" + p.getTrajectoryWeight();
 			if (Main.outfile != null) {
 				Main.outfile.write(line + "\n");
 			} else {

@@ -8,6 +8,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Dataparser {
+	
+	//private double scaleGata = 10000.0;
+	//private double scalePu = 12500.0;
+	
+	private double scaleGata = 1.0;
+	private double scalePu = 1.0;
 
 	public HashMap<String, HashMap<String, HashMap<String, ArrayList<Double>>>> generateDataTrees(
 			File dataFile) throws IOException {
@@ -19,6 +25,7 @@ public class Dataparser {
 		HashMap<String, Integer> nameToColnumMap;
 
 		String line = dbr.readLine();
+		
 		String[] cols = line.split(",");
 		nameToColnumMap = new HashMap<>();
 		for (int i = 0; i < cols.length; i++) {
@@ -46,9 +53,16 @@ public class Dataparser {
 
 			HashMap<String, ArrayList<Double>> currentCell = treeMap
 					.get(treeID).get(cellNr);
-			currentCell.get("time").add(Double.parseDouble(cols[nameToColnumMap.get("absoluteTime")]));
-			currentCell.get("Gata1").add((Double.parseDouble(cols[nameToColnumMap.get("auto_w02")]))/(Double.parseDouble(cols[nameToColnumMap.get("auto_w02_area")])));
-			currentCell.get("Pu1").add((Double.parseDouble(cols[nameToColnumMap.get("auto_w01")]))/(Double.parseDouble(cols[nameToColnumMap.get("auto_w01_area")])));
+			double gata = scaleGata * (Double.parseDouble(cols[nameToColnumMap.get("auto_w02")]));
+			double pu = scalePu * (Double.parseDouble(cols[nameToColnumMap.get("auto_w01")]));
+			double time = Double.parseDouble(cols[nameToColnumMap.get("absoluteTime")]);
+			currentCell.get("time").add(time);
+			currentCell.get("Gata1").add(gata);
+			currentCell.get("Pu1").add(pu);
+			
+			
+			//currentCell.get("Gata1").add((Double.parseDouble(cols[nameToColnumMap.get("auto_w02")]))/(Double.parseDouble(cols[nameToColnumMap.get("auto_w02_area")])));
+			//currentCell.get("Pu1").add((Double.parseDouble(cols[nameToColnumMap.get("auto_w01")]))/(Double.parseDouble(cols[nameToColnumMap.get("auto_w01_area")])));
 		}
 		dbr.close();
 
