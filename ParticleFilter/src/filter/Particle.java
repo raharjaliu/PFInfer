@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
+
 import org.apache.commons.math3.distribution.GammaDistribution;
 
 /**
@@ -51,7 +52,7 @@ public class Particle implements Runnable {
 					.put(tunable, new GammaDistribution(shape, scale));
 		}
 		
-		this.trajectoryWeight = 1.0;
+		this.trajectoryWeight = 0.0;
 	}
 
 	public void setTrajectoryWeight(double in){
@@ -63,7 +64,7 @@ public class Particle implements Runnable {
 	}
 	
 	public void updateWeight(double weight){
-		this.trajectoryWeight = this.trajectoryWeight * weight;
+		this.trajectoryWeight = this.trajectoryWeight + Math.log(weight);
 	}
 	
 	/**

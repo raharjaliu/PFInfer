@@ -12,7 +12,8 @@ import java.util.HashMap;
 
 public class Simulation {
 
-	private double timeprox = 1.0;
+	
+	private double timeprox = 10.0;
 	
 	private Model model;
 
