@@ -55,7 +55,6 @@ public class Model {
 							subreaction);
 					if (expression.contains(tunablename)) {
 						reactionMap.add(reactioname);
-						// System.out.println(tunablename + "\t" + reactioname);
 					}
 				}
 			}
@@ -111,6 +110,9 @@ public class Model {
 
 	public void setTunable(String name, Double value) {
 		this.tunable.put(name, value);
+		
+		Variable temp = this.variablespace.getVariable(name);
+		temp.setValue(value);
 	}
 
 	/**

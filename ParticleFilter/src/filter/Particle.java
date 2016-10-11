@@ -194,6 +194,7 @@ public class Particle implements Runnable {
 			double newTunable = thisGamma.sample();
 			this.simulation.getModel().setTunable(thisTunable, newTunable);
 		}
+		
 	}
 
 	/**

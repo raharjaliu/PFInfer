@@ -23,7 +23,7 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 
 public class ParticleFilter {
 
-	private double deviation = 7.0;
+	private double deviation = 10.0;
 	
 	private static final String DEFAULT_CELL_ID = "DEFAULT_CELL_ID";
 
@@ -261,6 +261,7 @@ public class ParticleFilter {
 			}
 			_particleWeights.add(combinedweight);
 			p.updateWeight(combinedweight);
+			
 		}
 
 		return (_particleWeights);
@@ -293,6 +294,11 @@ public class ParticleFilter {
 							% this.lockList.size());
 					newParticleList.add(_particleList.get(j).deepCopy(lock));
 					trackChosen.add(j);
+					
+					
+					//System.out.println(_particleList.get(j).getConcentration("Gata1") + "\t" + _particleWeights.get(j) + "\t" + _particleList.get(j).getModel().getTunable().get("Kpg"));
+
+					
 					break;
 				}
 			}
