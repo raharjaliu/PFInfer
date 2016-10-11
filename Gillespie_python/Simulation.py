@@ -30,15 +30,15 @@ class Simulation:
             self.propensities[self.reactionlistposition[key]] = self.m.get_propensity(key)
         return
         
-    def run_Simulation (self, time):
-        timestep = 0.0
+    def run_Simulation (self, time, start):
+        timestep = start
         
         outmap = {}
-        outmap['time'] =[timestep] 
+        outmap['absoluteTime'] =[timestep] 
         for species in self.m.species:
             outmap[species] = [self.m.species[species]]
             
-        while timestep < time:
+        while timestep < (time + start):
             combined_propensities = sum(self.propensities)
             r1 = random.random()
             r2 = random.random()
@@ -56,25 +56,24 @@ class Simulation:
             update = self.propensity_update[chosen]
             self.update_propensity(update)
             
-            outmap['time'].append(timestep)
+            outmap['absoluteTime'].append(timestep)
             for species in self.m.species:
                 outmap[species].append(self.m.species[species])
-            
+            print(timestep)
         return outmap  
     
-    def get_interval(self, trajectory, interval):
+    def get_interval(self, trajectory, interval, start):
         
         outmap = {}
         for key in trajectory:
             outmap[key] = [trajectory[key][0]]
         
-        nextinterval = interval
+        nextinterval = start + interval
         
-        for i in range(len(trajectory['time'])):
-            if trajectory['time'][i]>nextinterval:
+        for i in range(len(trajectory['absoluteTime'])):
+            if trajectory['absoluteTime'][i]>nextinterval:
                 nextinterval = nextinterval + interval
                 for key in trajectory:
-                    outmap[key].append(trajectory[key][i])
-                    
+                    outmap[key].append(trajectory[key][i])     
         return outmap
         

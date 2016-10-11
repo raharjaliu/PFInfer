@@ -1,10 +1,23 @@
+import copy
+
 class Model:
     
     species = {}
     rates = {}
     reactions = {}   
     propensities = {} 
+    
+    def get_copy(self):
         
+        deep = Model()
+        
+        deep.species = copy.deepcopy(self.species)
+        deep.rates = copy.deepcopy(self.rates)
+        deep.reactions = copy.deepcopy(self.reactions)
+        deep.propensities = copy.deepcopy(self.propensities)
+        
+        return deep
+    
     def add_species(self, tag, concentration):
         if tag in globals():
             print ('Warning: ' + tag + ' overwriting existing variable')
